@@ -1,27 +1,18 @@
+#include <stdio.h>
 #include "helperFunctions.h"
+#include "http_request_parser.h"
 
-int parseRquest_identifyRequest(char* requestBuffer);
+
 
 
 int main()
 {
-  char[] requestbuffer="GET /index.htmli\r\ncache-control: no-cache\r\naccept-encoding: gzip, deflate\r\n\r\n";
-  int parseRquest_identifyRequest(requestBuffer);
+  char requestBuffer[]="PUT /ta.gs/ref_htt%20%20pmethods.sht\r\ncache-control: no-cache\r\naccept-encoding: gzip, deflate\r\n\r\n";
+  int retVal=0;
+  http_request_t request;
+  printf("%s\r\n",requestBuffer);
+  retVal = parseRquest_identifyRequest(requestBuffer,&request);
+
+  printf("result\r\n\tfileType: %d\r\n\tmethod: %d\r\n\tpath:%s\r\n\r\n",request.fileType,request.method,request.httpFilePath);
 }
 
-
-
-/*
-   Function to parse incoming request buffer and identify the request method,
-   and path. 
-
-   At this initial stage , query strings and headers will not be handled since
-   the initial version is targeting just GET requests. 
-*/
-typedef struct {
-  
-}http_request_t;
-int parseRquest_identifyRequest(char* requestBuffer)
-{
-
-}
