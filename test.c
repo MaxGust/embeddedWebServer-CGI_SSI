@@ -4,7 +4,7 @@
 #include "http_request_parser.h"
 #include "http_common.h"
 #include "http_config.h"
-#include "http_replacer.h"
+#include "http_SSI_replacer.h"
 
 #define PASS "\e[1;32mPASS:\e[0m\t"
 #define FAIL "\e[1;31mFAIL:\e[0m\t"

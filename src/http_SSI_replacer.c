@@ -1,6 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
-#include "http_replacer.h"
+#include "http_SSI_replacer.h"
 #include "http_config.h"
 #include "http_common.h"
 
@@ -8,7 +8,7 @@
 1) lookup speed is better than linked list
 2) configuration is static and fixed at compile time. This can be adjusted in http_config.h 
 */
-http_SSI_replacer_t http_SSI_replacer[HTTP_MAX_SSI_SIZE + HTTP_MAX_CGI_SIZE]; //hoping compiler to do its job and init to 0
+http_SSI_replacer_t http_SSI_replacer[HTTP_MAX_SSI_SIZE]; //hoping compiler to do its job and init to 0
 
 int http_SSI_get_replacer_string(char *SSIString, char *replacerBuffer, unsigned int bufferLength)
 {
