@@ -11,7 +11,7 @@
 /*test routine to check if method type , file path and file type are parsed properly*/
 int test_methodFileType()
 {
-  char requestBuffer[] = "ET /ta.gs/ref_htt%20%20pmethods.shtm\r\ncache-control: no-cache\r\naccept-encoding: gzip, deflate\r\n\r\n";
+  char requestBuffer[] = "GET /ta.gs/ref_htt%20%20pmethods.shtm\r\ncache-control: no-cache\r\naccept-encoding: gzip, deflate\r\n\r\n";
   int retVal = 0;
   http_request_t request;
   //printf("%s\r\n", requestBuffer);
