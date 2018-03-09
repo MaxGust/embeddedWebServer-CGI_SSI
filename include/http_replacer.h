@@ -33,10 +33,10 @@ http_SSI_replacerHandle_t http_SSI_register_replacer(const char *SSIString, http
 /*function to populate replacement buffer*/
 int http_SSI_get_replacer_string(char *SSIString, char *replacerBuffer, unsigned int bufferLength);
 
-    /*function to de-register a specific replacement handle
+/*function to de-register a specific replacement handle
 incoming deregisterHandle will invalid NULL after this process.
 */
-    void http_SSI_deRegister_replacer(http_SSI_replacerHandle_t deregisterHandle);
+void http_SSI_deRegister_replacer(http_SSI_replacerHandle_t deregisterHandle);
 
 /*function to deregister all registrations in one go. Useful for shutdown*/
 void http_SSI_deRegister_all();

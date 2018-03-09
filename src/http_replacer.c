@@ -10,16 +10,16 @@
 */
 http_SSI_replacer_t http_SSI_replacer[HTTP_MAX_SSI_SIZE + HTTP_MAX_CGI_SIZE]; //hoping compiler to do its job and init to 0
 
-int http_SSI_get_replacer_string(char* SSIString, char *replacerBuffer,unsigned int bufferLength)
+int http_SSI_get_replacer_string(char *SSIString, char *replacerBuffer, unsigned int bufferLength)
 {
     int i;
     for (i = 0; i < HTTP_MAX_SSI_SIZE; i++)
     { //find an empty slot and fill in the registration
         if (NULL != http_SSI_replacer[i].SSI_String)
         {
-            if(0==strcmp(SSIString,http_SSI_replacer[i].SSI_String))
+            if (0 == strcmp(SSIString, http_SSI_replacer[i].SSI_String))
             {
-                return http_SSI_replacer[i].SSI_stringReplacer(SSIString,replacerBuffer,bufferLength);
+                return http_SSI_replacer[i].SSI_stringReplacer(SSIString, replacerBuffer, bufferLength);
             }
         }
     }
