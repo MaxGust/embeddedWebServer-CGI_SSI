@@ -58,7 +58,7 @@ static httpFileType_code_t parseRequest_identifyFileClass(char *path)
         fileType += 1; //to remove the .
     }
 
-    int i = 0;
+    unsigned int i = 0;
     for (i = 0; i < httpFileType_SSIList_size; i++)
     {
         if (0 == strcmp(httpFileType_SSIList[i], fileType))

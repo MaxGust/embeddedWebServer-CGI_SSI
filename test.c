@@ -7,10 +7,22 @@
 #include "http_SSI_replacer.h"
 #include "http_cgi.h"
 
-#define PASS "\e[1;32mPASS:\e[0m\t"
-#define FAIL "\e[1;31mFAIL:\e[0m\t"
+#define PASS "\x1B[1;32mPASS:\x1B[0m\t"
+#define FAIL "\x1B[1;31mFAIL:\x1B[0m\t"
 /*test routine to check if method type , file path and file type are parsed properly*/
-int test_methodFileType()
+int test_methodFileType(void);
+int timerVal_SSI_replacer_cb(const char *SSIString, char *replacerBuffer, unsigned int bufferLength);
+int sysStatus_SSI_replacer_cb(const char *SSIString, char *replacerBuffer, unsigned int bufferLength);
+int resetStatus_SSI_replacer_cb(const char *SSIString, char *replacerBuffer, unsigned int bufferLength);
+int test_SSIStringRegistration(void);
+int test_SSIStringReplacementCB(void);
+int exec1_CGI_cb(const char *CGIPath, char *replacerBuffer, unsigned int bufferLength);
+int exec2_CGI_cb(const char *CGIPath, char *replacerBuffer, unsigned int bufferLength);
+int exec3_CGI_cb(const char *CGIPath, char *replacerBuffer, unsigned int bufferLength);
+int test_CGI_registration(void);
+int test_CGI_exec(void);
+
+int test_methodFileType(void)
 {
   char requestBuffer[] = "GET /ta.gs/ref_htt%20%20pmethods.shtm\r\ncache-control: no-cache\r\naccept-encoding: gzip, deflate\r\n\r\n";
   int retVal = 0;
@@ -43,25 +55,37 @@ int test_methodFileType()
 /*test callbacks to replace SSI string timerVal*/
 int timerVal_SSI_replacer_cb(const char *SSIString, char *replacerBuffer, unsigned int bufferLength)
 {
+  if (0 != strcmp("timerVal", SSIString))
+  {
+    return -1;
+  }
   strncpy(replacerBuffer, "timerValue is 200", bufferLength);
   replacerBuffer[bufferLength] = 0;
   return 0;
 }
 int sysStatus_SSI_replacer_cb(const char *SSIString, char *replacerBuffer, unsigned int bufferLength)
 {
+  if (0 != strcmp("sysStatus", SSIString))
+  {
+    return -1;
+  }
   strncpy(replacerBuffer, "System is up and running", bufferLength);
   replacerBuffer[bufferLength] = 0;
   return 0;
 }
 int resetStatus_SSI_replacer_cb(const char *SSIString, char *replacerBuffer, unsigned int bufferLength)
 {
+  if (0 != strcmp("resetStatus", SSIString))
+  {
+    return -1;
+  }
   strncpy(replacerBuffer, "Previous reset caused by Watchdog", bufferLength);
   replacerBuffer[bufferLength] = 0;
   return 0;
 }
 
 /*test routine to check if callback registration for SSI string is done properly*/
-int test_SSIStringRegistration()
+int test_SSIStringRegistration(void)
 {
   char *testSSIString1 = "timerVal";
   char *testSSIString2 = "sysStatus";
@@ -117,7 +141,7 @@ int test_SSIStringRegistration()
 }
 
 /*unittest for replacement matching */
-int test_SSIStringReplacementCB()
+int test_SSIStringReplacementCB(void)
 {
   char stringArray[100];
   //try for replacement string of "timerVal"
@@ -147,25 +171,37 @@ int test_SSIStringReplacementCB()
 /*test callbacks to replace SSI string timerVal*/
 int exec1_CGI_cb(const char *CGIPath, char *replacerBuffer, unsigned int bufferLength)
 {
+  if (0 != strcmp("/CGI/exec1.cgi", CGIPath))
+  {
+    return -1;
+  }
   strncpy(replacerBuffer, "exec1 Executed", bufferLength);
   replacerBuffer[bufferLength] = 0;
   return 0;
 }
 int exec2_CGI_cb(const char *CGIPath, char *replacerBuffer, unsigned int bufferLength)
 {
+  if (0 != strcmp("/bin/exec2.sh", CGIPath))
+  {
+    return -1;
+  }
   strncpy(replacerBuffer, "exec2 Executed", bufferLength);
   replacerBuffer[bufferLength] = 0;
   return 0;
 }
 int exec3_CGI_cb(const char *CGIPath, char *replacerBuffer, unsigned int bufferLength)
 {
+  if (0 != strcmp("/exec3.exe", CGIPath))
+  {
+    return -1;
+  }
   strncpy(replacerBuffer, "exec3 executed", bufferLength);
   replacerBuffer[bufferLength] = 0;
   return 0;
 }
 
 /*unit test for CGI*/
-int test_CGI_registration()
+int test_CGI_registration(void)
 {
   char *cgiPath1 = "/CGI/exec1.cgi";
   char *cgiPath2 = "/bin/exec2.sh";
@@ -220,7 +256,7 @@ int test_CGI_registration()
   return 0;
 }
 
-int test_CGI_exec()
+int test_CGI_exec(void)
 {
   char stringArray[100];
   //try for exec of "/CGI/exec1.cgi"
@@ -247,7 +283,7 @@ int test_CGI_exec()
   return 0;
 }
 
-int main()
+int main(void)
 {
   //testing request method and path parsing
   int retval = 0;

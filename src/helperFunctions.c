@@ -30,7 +30,7 @@ int url_decode(const char *s, char *dec)
       c = ' ';
     else if (c == '%' && (!ishex(*s++) ||
                           !ishex(*s++) ||
-                          !sscanf(s - 2, "%2x", &c)))
+                          !sscanf(s - 2, "%2x",(unsigned int*) &c)))
       return -1;
 
     if (dec)

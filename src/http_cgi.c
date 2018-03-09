@@ -67,7 +67,7 @@ void http_CGI_deRegister_pathFunction(http_CGI_pathFunctionHandle_t deregisterHa
 }
 
 //deregister all registrations in one-go. Useful to implement a shutdown function
-void http_CGI_deRegister_all()
+void http_CGI_deRegister_all(void)
 {
     int i = 0;
     for (i = 0; i < HTTP_MAX_CGI_SIZE; i++)
@@ -83,7 +83,7 @@ void http_CGI_deRegister_all()
 }
 
 //test function to print complete registration table. to be used only for debugging
-void http_CGI_printPathFunctionTable()
+void http_CGI_printPathFunctionTable(void)
 {
     int i;
     printf("FUNCTION\t\tPATH\r\n");

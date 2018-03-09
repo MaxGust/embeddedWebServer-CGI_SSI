@@ -39,9 +39,9 @@ incoming deregisterHandle will invalid NULL after this process.
 void http_SSI_deRegister_replacer(http_SSI_replacerHandle_t deregisterHandle);
 
 /*function to deregister all registrations in one go. Useful for shutdown*/
-void http_SSI_deRegister_all();
+void http_SSI_deRegister_all(void);
 
 /*debug function to print teh complete registration table*/
-void http_SSI_printReplacerTable();
+void http_SSI_printReplacerTable(void);
 
 #endif

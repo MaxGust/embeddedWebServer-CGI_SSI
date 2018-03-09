@@ -39,9 +39,9 @@ incoming deregisterHandle will invalid NULL after this process.
 void http_CGI_deRegister_pathFunction(http_CGI_pathFunctionHandle_t deregisterHandle);
 
 /*function to deregister all registrations in one go. Useful for shutdown*/
-void http_CGI_deRegister_all();
+void http_CGI_deRegister_all(void);
 
 /*debug function to print teh complete registration table*/
-void http_CGI_printPathFunctionTable();
+void http_CGI_printPathFunctionTable(void);
 
 #endif

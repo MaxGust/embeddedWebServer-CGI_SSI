@@ -67,7 +67,7 @@ void http_SSI_deRegister_replacer(http_SSI_replacerHandle_t deregisterHandle)
 }
 
 //deregister all registrations in one-go. Useful to implement a shutdown function
-void http_SSI_deRegister_all()
+void http_SSI_deRegister_all(void)
 {
     int i = 0;
     for (i = 0; i < HTTP_MAX_SSI_SIZE; i++)
@@ -83,7 +83,7 @@ void http_SSI_deRegister_all()
 }
 
 //test function to print complete registration table. to be used only for debugging
-void http_SSI_printReplacerTable()
+void http_SSI_printReplacerTable(void)
 {
     int i;
     printf("REPLACER\t\tSTRING\r\n");
