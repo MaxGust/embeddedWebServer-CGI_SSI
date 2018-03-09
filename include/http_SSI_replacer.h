@@ -1,5 +1,5 @@
-#ifndef __HTTP_SSI_FUNCTION_REGISTRATION_H__
-#define __HTTP_SSI_FUNCTION_REGISTRATION_H__
+#ifndef __HTTP_SSI_REPLACER_H__
+#define __HTTP_SSI_REPLACER_H__
 
 #include "http_config.h"
 

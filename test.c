@@ -5,7 +5,7 @@
 #include "http_common.h"
 #include "http_config.h"
 #include "http_SSI_replacer.h"
-#include "Http_cgi.h"
+#include "http_cgi.h"
 
 #define PASS "\e[1;32mPASS:\e[0m\t"
 #define FAIL "\e[1;31mFAIL:\e[0m\t"
