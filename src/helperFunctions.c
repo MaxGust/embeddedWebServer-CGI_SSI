@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include "helperFunctions.h"
 
 // for URL decoding function
 static inline int ishex(int x)
