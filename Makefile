@@ -1,6 +1,6 @@
 CC=gcc
 
 test: 
-	@$(CC) -o test.out src/helperFunctions.c src/http_request_parser.c test.c -I./include
+	@$(CC) -o test.out src/*.c test.c -I./include
 clean:
 	@rm -f *.out *.o

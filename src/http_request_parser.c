@@ -8,6 +8,8 @@
 
 #include "http_request_parser.h"
 #include "helperFunctions.h"
+#include "http_config.h"
+#include "http_common.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -115,5 +117,5 @@ int parseRquest_identifyRequest(char *requestBuffer, http_request_t *httpRequest
     httpRequest->fileType = parseRequest_identifyFileClass(path);
 
     //return success
-    return 0;
+    return HTTP_SUCCESS;
 }

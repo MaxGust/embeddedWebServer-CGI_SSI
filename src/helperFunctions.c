@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "helperFunctions.h"
+#include "http_config.h"
+#include "http_common.h"
 
 // for URL decoding function
 static inline int ishex(int x)

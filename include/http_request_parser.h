@@ -1,8 +1,7 @@
 #ifndef __HTTP_REQUEST_PARSER_H__
 #define __HTTP_REQUEST_PARSER_H__
 
-#define HTTP_MAX_PATH_LENGTH 100
-#define HTTP_MAX_METHOD_LENGTH 8
+#include "http_config.h"
 
 //HTTP method enums
 typedef enum {
