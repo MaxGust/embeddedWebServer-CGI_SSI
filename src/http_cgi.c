@@ -1,6 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
-#include "http_CGI.h"
+#include "http_cgi.h"
 #include "http_config.h"
 #include "http_common.h"
 
