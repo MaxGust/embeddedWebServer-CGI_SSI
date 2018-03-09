@@ -11,7 +11,6 @@
 
 //Max number of SSI strings supported
 #define HTTP_MAX_SSI_SIZE   5
-
 //Max number of CGIs supported
 #define HTTP_MAX_CGI_SIZE   5
 
