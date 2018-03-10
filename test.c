@@ -610,6 +610,7 @@ int test_response_header(void)
     return -1;
   }
 
+  //test chunked encoding with a different response code
   headerRequest.chunkedEncoding = 1;
   headerRequest.responseCode = HTTP_RESCODE_cerrorNotfound;
   http_response_response_header(headerRequest);
@@ -619,6 +620,13 @@ int test_response_header(void)
   {
     printf(FAIL "test_response_header(3)\r\n");
     return -1;
+  }
+
+  //test small input buffer
+  headerRequest.bufferLength = 3;
+  int retval=http_response_response_header(headerRequest);
+  if(retval>=0){
+    printf(FAIL "test_response_header(4)\r\n");
   }
 
   // printf("\r\n%s",headerBuffer);

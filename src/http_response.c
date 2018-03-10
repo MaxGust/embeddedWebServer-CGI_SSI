@@ -62,7 +62,7 @@ http_response_fileType_t http_response_getFileType(char *requestPath)
         return HTTP_fileType_unknown;
 
     PRINT_ERROR("unhandled condition\r\n");
-    return -1;
+    return HTTP_FAILURE;
 }
 
 http_response_contenttype_t http_response_get_contentType_string(http_response_fileType_t fileType, char *buffer, unsigned int bufferLength)
@@ -70,7 +70,7 @@ http_response_contenttype_t http_response_get_contentType_string(http_response_f
     if ((NULL == buffer) || (bufferLength <= 0))
     {
         PRINT_ERROR("NULL buffer or zero length\r\n");
-        return -1;
+        return HTTP_FAILURE;
     }
     else
     {
@@ -159,7 +159,7 @@ http_response_contenttype_t http_response_get_contentType_string(http_response_f
     }
 
     PRINT_ERROR("unhandled condition\r\n");
-    return -1;
+    return HTTP_FAILURE;
 }
 
 int http_response_contentTypeToString(http_response_contenttype_t contentType, char *buffer, unsigned int length)
@@ -167,7 +167,7 @@ int http_response_contentTypeToString(http_response_contenttype_t contentType, c
     if ((NULL == buffer) || (0 == length))
     {
         PRINT_ERROR("NULL buffer or 0 length");
-        return -1;
+        return HTTP_FAILURE;
     }
 
     switch (contentType)
@@ -245,7 +245,7 @@ int http_response_contentTypeToString(http_response_contenttype_t contentType, c
     }
 
     PRINT_ERROR("unhandled case\r\n");
-    return 0;
+    return HTTP_SUCCESS;
 }
 
 /*- responseBody can be NULL for responses that does not have a body
@@ -262,7 +262,7 @@ int http_response_response_header(HTTP_response_headerRequest_t headerRequest)
     if ((NULL == headerRequest.headerBuffer) || (headerRequest.bufferLength <= 0))
     {
         PRINT_ERROR(" null buffer or 0 length");
-        return -1;
+        return HTTP_FAILURE;
     }
 
     char responseLine[HTTP_RESPONSE_LINE1_LENGTH];
@@ -380,7 +380,7 @@ int http_response_response_header(HTTP_response_headerRequest_t headerRequest)
     //final Assembly
     if(headerRequest.bufferLength<(strlen(responseLine)+strlen(contentTypeLine)+strlen(contentLengthLine))){
         PRINT_ERROR("total header length > provided buffer\r\n");
-        return -1;
+        return HTTP_FAILURE;
     }
 
     int printedChar;
@@ -398,5 +398,5 @@ int http_response_response_header(HTTP_response_headerRequest_t headerRequest)
 
     snprintf((headerRequest.headerBuffer + printedChar), headerRequest.bufferLength, "\r\n");
 
-    return 0;
+    return HTTP_SUCCESS;
 }

@@ -4,7 +4,8 @@
 #include <stdio.h>
 #include "http_config.h"
 
-#define HTTP_SUCCESS 0
+#define HTTP_SUCCESS (int)0
+#define HTTP_FAILURE (int)-1
 #define http_true 1
 #define http_false 0
 
