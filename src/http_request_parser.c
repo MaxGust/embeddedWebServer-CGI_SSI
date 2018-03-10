@@ -75,7 +75,7 @@ static httpFileType_code_t parseRequest_identifyFileClass(char *path)
 }
 int parseRquest_identifyRequest(char *requestBuffer, http_request_t *httpRequest)
 {
-
+    /*TODO: suppot Query parsing*/
     const char *startOfPath = strchr(requestBuffer, ' ') + 1;
     const char *endOfPath;
 
