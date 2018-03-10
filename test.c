@@ -24,6 +24,7 @@ int test_CGI_registration(void);
 int test_CGI_exec(void);
 int test_response_fileType(void);
 int test_response_contentType(void);
+int test_response_header(void);
 
 int test_methodFileType(void)
 {
@@ -427,142 +428,203 @@ int test_response_contentType(void)
   http_response_contenttype_t contentType;
   char buffer[100];
 
-  contentType=http_response_get_contentType_string(HTTP_fileType_HTML, (char*)&buffer, 100);
-  if(HTTP_contentType_html!=contentType){
+  contentType = http_response_get_contentType_string(HTTP_fileType_HTML, (char *)&buffer, 100);
+  if (HTTP_contentType_html != contentType)
+  {
     printf(FAIL "test_response_contentType(1)\r\n");
     return -1;
   }
-  else if (0!=strcmp (HTTP_RES_CONTENT_TYPE_HTML,(char*)&buffer))
+  else if (0 != strcmp(HTTP_RES_CONTENT_TYPE_HTML, (char *)&buffer))
   {
-      printf(FAIL "test_response_contentType(2)\r\n");
-      return -2;
+    printf(FAIL "test_response_contentType(2)\r\n");
+    return -2;
   }
 
-  contentType=http_response_get_contentType_string(HTTP_fileType_TXT, (char*)&buffer, 100);
-  if(HTTP_contentType_plaintext!=contentType){
+  contentType = http_response_get_contentType_string(HTTP_fileType_TXT, (char *)&buffer, 100);
+  if (HTTP_contentType_plaintext != contentType)
+  {
     printf(FAIL "test_response_contentType(3)\r\n");
     return -1;
   }
-  else if (0!=strcmp (HTTP_RES_CONTENT_TYPE_PLAINTEXT,(char*)&buffer))
+  else if (0 != strcmp(HTTP_RES_CONTENT_TYPE_PLAINTEXT, (char *)&buffer))
   {
-      printf(FAIL "test_response_contentType(4)\r\n");
-      return -2;
+    printf(FAIL "test_response_contentType(4)\r\n");
+    return -2;
   }
 
-  contentType=http_response_get_contentType_string(HTTP_fileType_CSS, (char*)&buffer, 100);
-  if(HTTP_contentType_css!=contentType){
+  contentType = http_response_get_contentType_string(HTTP_fileType_CSS, (char *)&buffer, 100);
+  if (HTTP_contentType_css != contentType)
+  {
     printf(FAIL "test_response_contentType(5)\r\n");
     return -1;
   }
-  else if (0!=strcmp (HTTP_RES_CONTENT_TYPE_CSS,(char*)&buffer))
+  else if (0 != strcmp(HTTP_RES_CONTENT_TYPE_CSS, (char *)&buffer))
   {
-      printf(FAIL "test_response_contentType(6)\r\n");
-      return -2;
+    printf(FAIL "test_response_contentType(6)\r\n");
+    return -2;
   }
 
-  contentType=http_response_get_contentType_string(HTTP_fileType_JS, (char*)&buffer, 100);
-  if(HTTP_contentType_js!=contentType){
+  contentType = http_response_get_contentType_string(HTTP_fileType_JS, (char *)&buffer, 100);
+  if (HTTP_contentType_js != contentType)
+  {
     printf(FAIL "test_response_contentType(7)\r\n");
     return -1;
   }
-  else if (0!=strcmp (HTTP_RES_CONTENT_TYPE_JS,(char*)&buffer))
+  else if (0 != strcmp(HTTP_RES_CONTENT_TYPE_JS, (char *)&buffer))
   {
-      printf(FAIL "test_response_contentType(8)\r\n");
-      return -2;
+    printf(FAIL "test_response_contentType(8)\r\n");
+    return -2;
   }
 
-  contentType=http_response_get_contentType_string(HTTP_fileType_JSON, (char*)&buffer, 100);
-  if(HTTP_contentType_json!=contentType){
+  contentType = http_response_get_contentType_string(HTTP_fileType_JSON, (char *)&buffer, 100);
+  if (HTTP_contentType_json != contentType)
+  {
     printf(FAIL "test_response_contentType(9)\r\n");
     return -1;
   }
-  else if (0!=strcmp (HTTP_RES_CONTENT_TYPE_JSON,(char*)&buffer))
+  else if (0 != strcmp(HTTP_RES_CONTENT_TYPE_JSON, (char *)&buffer))
   {
-      printf(FAIL "test_response_contentType(10)\r\n");
-      return -2;
+    printf(FAIL "test_response_contentType(10)\r\n");
+    return -2;
   }
 
-  contentType=http_response_get_contentType_string(HTTP_fileType_JPEG, (char*)&buffer, 100);
-  if(HTTP_contentType_jpeg!=contentType){
+  contentType = http_response_get_contentType_string(HTTP_fileType_JPEG, (char *)&buffer, 100);
+  if (HTTP_contentType_jpeg != contentType)
+  {
     printf(FAIL "test_response_contentType(11)\r\n");
     return -1;
   }
-  else if (0!=strcmp (HTTP_RES_CONTENT_TYPE_JPEG,(char*)&buffer))
+  else if (0 != strcmp(HTTP_RES_CONTENT_TYPE_JPEG, (char *)&buffer))
   {
-      printf(FAIL "test_response_contentType(12)\r\n");
-      return -2;
+    printf(FAIL "test_response_contentType(12)\r\n");
+    return -2;
   }
 
-  contentType=http_response_get_contentType_string(HTTP_fileType_PNG, (char*)&buffer, 100);
-  if(HTTP_contentType_png!=contentType){
+  contentType = http_response_get_contentType_string(HTTP_fileType_PNG, (char *)&buffer, 100);
+  if (HTTP_contentType_png != contentType)
+  {
     printf(FAIL "test_response_contentType(13)\r\n");
     return -1;
   }
-  else if (0!=strcmp (HTTP_RES_CONTENT_TYPE_PNG,(char*)&buffer))
+  else if (0 != strcmp(HTTP_RES_CONTENT_TYPE_PNG, (char *)&buffer))
   {
-      printf(FAIL "test_response_contentType(14)\r\n");
-      return -2;
-  }  
-  
-  contentType=http_response_get_contentType_string(HTTP_fileType_BIN, (char*)&buffer, 100);
-  if(HTTP_contentType_bin!=contentType){
+    printf(FAIL "test_response_contentType(14)\r\n");
+    return -2;
+  }
+
+  contentType = http_response_get_contentType_string(HTTP_fileType_BIN, (char *)&buffer, 100);
+  if (HTTP_contentType_bin != contentType)
+  {
     printf(FAIL "test_response_contentType(15)\r\n");
     return -1;
   }
-  else if (0!=strcmp (HTTP_RES_CONTENT_TYPE_BIN,(char*)&buffer))
+  else if (0 != strcmp(HTTP_RES_CONTENT_TYPE_BIN, (char *)&buffer))
   {
-      printf(FAIL "test_response_contentType(16)\r\n");
-      return -2;
+    printf(FAIL "test_response_contentType(16)\r\n");
+    return -2;
   }
 
-  contentType=http_response_get_contentType_string(HTTP_fileType_CSV, (char*)&buffer, 100);
-  if(HTTP_contentType_csv!=contentType){
+  contentType = http_response_get_contentType_string(HTTP_fileType_CSV, (char *)&buffer, 100);
+  if (HTTP_contentType_csv != contentType)
+  {
     printf(FAIL "test_response_contentType(17)\r\n");
     return -1;
   }
-  else if (0!=strcmp (HTTP_RES_CONTENT_TYPE_CSV,(char*)&buffer))
+  else if (0 != strcmp(HTTP_RES_CONTENT_TYPE_CSV, (char *)&buffer))
   {
-      printf(FAIL "test_response_contentType(18)\r\n");
-      return -2;
+    printf(FAIL "test_response_contentType(18)\r\n");
+    return -2;
   }
 
-  contentType=http_response_get_contentType_string(HTTP_fileType_GIF, (char*)&buffer, 100);
-  if(HTTP_contentType_gif!=contentType){
+  contentType = http_response_get_contentType_string(HTTP_fileType_GIF, (char *)&buffer, 100);
+  if (HTTP_contentType_gif != contentType)
+  {
     printf(FAIL "test_response_contentType(19)\r\n");
     return -1;
   }
-  else if (0!=strcmp (HTTP_RES_CONTENT_TYPE_GIF,(char*)&buffer))
+  else if (0 != strcmp(HTTP_RES_CONTENT_TYPE_GIF, (char *)&buffer))
   {
-      printf(FAIL "test_response_contentType(20)\r\n");
-      return -2;
+    printf(FAIL "test_response_contentType(20)\r\n");
+    return -2;
   }
 
-  contentType=http_response_get_contentType_string(HTTP_fileType_ICO, (char*)&buffer, 100);
-  if(HTTP_contentType_ico!=contentType){
+  contentType = http_response_get_contentType_string(HTTP_fileType_ICO, (char *)&buffer, 100);
+  if (HTTP_contentType_ico != contentType)
+  {
     printf(FAIL "test_response_contentType(21)\r\n");
     return -1;
   }
-  else if (0!=strcmp (HTTP_RES_CONTENT_TYPE_ICO,(char*)&buffer))
+  else if (0 != strcmp(HTTP_RES_CONTENT_TYPE_ICO, (char *)&buffer))
   {
-      printf(FAIL "test_response_contentType(22)\r\n");
-      return -2;
+    printf(FAIL "test_response_contentType(22)\r\n");
+    return -2;
   }
 
-  contentType=http_response_get_contentType_string(HTTP_fileType_ZIP, (char*)&buffer, 100);
-  if(HTTP_contentType_zip!=contentType){
+  contentType = http_response_get_contentType_string(HTTP_fileType_ZIP, (char *)&buffer, 100);
+  if (HTTP_contentType_zip != contentType)
+  {
     printf(FAIL "test_response_contentType(23)\r\n");
     return -1;
   }
-  else if (0!=strcmp (HTTP_RES_CONTENT_TYPE_ZIP,(char*)&buffer))
+  else if (0 != strcmp(HTTP_RES_CONTENT_TYPE_ZIP, (char *)&buffer))
   {
-      printf(FAIL "test_response_contentType(24)\r\n");
-      return -2;
+    printf(FAIL "test_response_contentType(24)\r\n");
+    return -2;
   }
 
   printf(PASS "test_response_contentType\r\n");
   return 0;
 }
 
+int test_response_header(void)
+{
+
+  HTTP_response_headerRequest_t headerRequest;
+  char headerBuffer[300];
+
+  headerRequest.responseCode = HTTP_RESCODE_successSuccess;
+  headerRequest.bodyLength = 1024;
+  headerRequest.headerBuffer = (char *)&headerBuffer;
+  headerRequest.bufferLength = 300;
+  headerRequest.chunkedEncoding = 0;
+  headerRequest.filePath = "/index.html";
+
+  http_response_response_header(headerRequest);
+
+  char *expectedResponse1 = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 1024\r\n\r\n";
+  if (0 != strcmp(headerBuffer, expectedResponse1))
+  {
+    printf(FAIL "test_response_header(1)\r\n");
+    return -1;
+  }
+
+  headerRequest.filePath = NULL;
+  headerRequest.responseCode = HTTP_RESCODE_serrorInternalerror; //invalid with content. just for unit test
+  headerRequest.contentType = HTTP_contentType_bin;
+  http_response_response_header(headerRequest);
+  char *expectedResponse2 = "HTTP/1.1 500 Internal Server Error\r\nContent-Type: application/octet-stream\r\nContent-Length: 1024\r\n\r\n";
+
+  if (0 != strcmp(headerBuffer, expectedResponse2))
+  {
+    printf(FAIL "test_response_header(2)\r\n");
+    return -1;
+  }
+
+  headerRequest.chunkedEncoding = 1;
+  headerRequest.responseCode = HTTP_RESCODE_cerrorNotfound;
+  http_response_response_header(headerRequest);
+  char *expectedResponse3 = "HTTP/1.1 404 Not Found\r\nContent-Type: application/octet-stream\r\nContent-Length: chunked\r\n\r\n";
+
+  if (0 != strcmp(headerBuffer, expectedResponse3))
+  {
+    printf(FAIL "test_response_header(3)\r\n");
+    return -1;
+  }
+
+  // printf("\r\n%s",headerBuffer);
+  printf(PASS "test_response_header\r\n");
+  return 0;
+}
 int main(void)
 {
   //testing request method and path parsing
@@ -581,7 +643,8 @@ int main(void)
     retval = -5;
   if (0 != test_response_contentType())
     retval = -6;
-
+  if (0 != test_response_header())
+    retval = -7;
   if (0 == retval)
   {
     printf(PASS "****************ALL TESTS PASSED****************\r\n\r\n");
