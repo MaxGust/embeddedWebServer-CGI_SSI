@@ -1,7 +1,7 @@
 #ifndef __HTTP_CONFIG_H__
 #define __HTTP_CONFIG_H__
 
-#define DEBUG_ERROR
+#define DEBUG_ERROR 0
 
 //Max length of path supported by the system including string termination
 #define HTTP_MAX_PATH_LENGTH 100

@@ -1,12 +1,16 @@
 #include "http_response.h"
+#include "http_common.h"
+#include "http_config.h"
 #include <stdio.h>
 #include <string.h>
 
 http_response_fileType_t http_response_getFileType(char *requestPath)
 {
-    char *fileType = strrchr(requestPath, '.');
+    char *fileType;
+    fileType = strrchr(requestPath, '.');
     if (0 == fileType)
     {
+        PRINT_ERROR("File type  unknown\r\n");
         return HTTP_fileType_unknown;
     }
 
@@ -57,6 +61,7 @@ http_response_fileType_t http_response_getFileType(char *requestPath)
     else
         return HTTP_fileType_unknown;
 
+    PRINT_ERROR("unhandled condition\r\n");
     return -1;
 }
 
@@ -64,6 +69,7 @@ http_response_contenttype_t http_response_get_contentType_string(http_response_f
 {
     if ((NULL == buffer) || (bufferLength <= 0))
     {
+        PRINT_ERROR("NULL buffer or zero length\r\n");
         return -1;
     }
     else
@@ -151,13 +157,18 @@ http_response_contenttype_t http_response_get_contentType_string(http_response_f
             return HTTP_contentType_plaintext;
         }
     }
+
+    PRINT_ERROR("unhandled condition\r\n");
     return -1;
 }
 
 int http_response_contentTypeToString(http_response_contenttype_t contentType, char *buffer, unsigned int length)
 {
     if ((NULL == buffer) || (0 == length))
+    {
+        PRINT_ERROR("NULL buffer or 0 length");
         return -1;
+    }
 
     switch (contentType)
     {
@@ -228,9 +239,12 @@ int http_response_contentTypeToString(http_response_contenttype_t contentType, c
     }
     default:
     {
+        PRINT_ERROR("unhandled case. passing default\r\n");
         strncpy(buffer, HTTP_RES_CONTENT_TYPE_PLAINTEXT, length);
     }
     }
+
+    PRINT_ERROR("unhandled case\r\n");
     return 0;
 }
 
@@ -247,6 +261,7 @@ int http_response_response_header(HTTP_response_headerRequest_t headerRequest)
 {
     if ((NULL == headerRequest.headerBuffer) || (headerRequest.bufferLength <= 0))
     {
+        PRINT_ERROR(" null buffer or 0 length");
         return -1;
     }
 
@@ -307,6 +322,7 @@ int http_response_response_header(HTTP_response_headerRequest_t headerRequest)
     }
     default:
     {
+        PRINT_ERROR("default case. passing default\r\n");
         snprintf(responseLine, HTTP_RESPONSE_LINE1_LENGTH, HTTP_RES_HTTP_VERSION " " HTTP_RESSTRING_SERROR_NOTIMPLEMENTED);
         break;
     }
@@ -319,14 +335,24 @@ int http_response_response_header(HTTP_response_headerRequest_t headerRequest)
         char lcontentTypeLine[HTTP_RESPONSE_CONTTYPE_LENGTH];
 
         fileType = http_response_getFileType(headerRequest.filePath);
-        http_response_get_contentType_string(fileType, lcontentTypeLine, HTTP_RESPONSE_CONTTYPE_LENGTH);
+        int retval;
+        retval = http_response_get_contentType_string(fileType, lcontentTypeLine, HTTP_RESPONSE_CONTTYPE_LENGTH);
+        if (retval < 0)
+        {
+            PRINT_ERROR("error converting contentType to string\r\n");
+        }
         snprintf(contentTypeLine, HTTP_RESPONSE_CONTTYPE_LENGTH, HTTP_RESHEADER_CONTENT_TYPE ": %s", lcontentTypeLine);
         contentTypeLineDone = 1;
     }
     else if (0 != headerRequest.contentType)
     {
         char lcontentTypeLine[HTTP_RESPONSE_CONTTYPE_LENGTH];
-        http_response_contentTypeToString(headerRequest.contentType, lcontentTypeLine, HTTP_RESPONSE_CONTTYPE_LENGTH);
+        int retVal;
+        retVal = http_response_contentTypeToString(headerRequest.contentType, lcontentTypeLine, HTTP_RESPONSE_CONTTYPE_LENGTH);
+        if (retVal < 0)
+        {
+            PRINT_ERROR("error converting contentType to string\r\n");
+        }
         snprintf(contentTypeLine, HTTP_RESPONSE_CONTTYPE_LENGTH, HTTP_RESHEADER_CONTENT_TYPE ": %s", lcontentTypeLine);
         contentTypeLineDone = 1;
     }
@@ -351,12 +377,12 @@ int http_response_response_header(HTTP_response_headerRequest_t headerRequest)
     printedChar = snprintf(headerRequest.headerBuffer, headerRequest.bufferLength, "%s\r\n", responseLine);
     if (0 != contentTypeLineDone)
     {
-        headerRequest.bufferLength-=printedChar+1;
+        headerRequest.bufferLength -= printedChar + 1;
         printedChar += snprintf((headerRequest.headerBuffer + printedChar), headerRequest.bufferLength, "%s\r\n", contentTypeLine);
     }
     if (0 != contentLengthLineDone)
     {
-        headerRequest.bufferLength-=printedChar+1;
+        headerRequest.bufferLength -= printedChar + 1;
         printedChar += snprintf((headerRequest.headerBuffer + printedChar), headerRequest.bufferLength, "%s\r\n", contentLengthLine);
     }
 
