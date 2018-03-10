@@ -271,6 +271,11 @@ int http_response_response_header(HTTP_response_headerRequest_t headerRequest)
     char contentTypeLineDone = 0;
     char contentLengthLineDone = 0;
 
+    responseLine[0]=0;
+    contentTypeLine[0]=0;
+    contentLengthLine[0]=0;
+    headerRequest.headerBuffer[0]=0;
+
     //sprint response line 1
     //TODO: handle all responses
     switch (headerRequest.responseCode)
@@ -373,6 +378,11 @@ int http_response_response_header(HTTP_response_headerRequest_t headerRequest)
     }
 
     //final Assembly
+    if(headerRequest.bufferLength<(strlen(responseLine)+strlen(contentTypeLine)+strlen(contentLengthLine))){
+        PRINT_ERROR("total header length > provided buffer\r\n");
+        return -1;
+    }
+
     int printedChar;
     printedChar = snprintf(headerRequest.headerBuffer, headerRequest.bufferLength, "%s\r\n", responseLine);
     if (0 != contentTypeLineDone)
