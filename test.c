@@ -7,6 +7,7 @@
 #include "http_SSI_replacer.h"
 #include "http_cgi.h"
 #include "http_response.h"
+#include "http_file_local_filesystem.h"
 
 #define PASS "\x1B[1;32mPASS:\x1B[0m\t"
 #define FAIL "\x1B[1;31mFAIL:\x1B[0m\t"
@@ -25,6 +26,7 @@ int test_CGI_exec(void);
 int test_response_fileType(void);
 int test_response_contentType(void);
 int test_response_header(void);
+int test_file_local_filesystem(void);
 
 int test_methodFileType(void)
 {
@@ -633,6 +635,26 @@ int test_response_header(void)
   printf(PASS "test_response_header\r\n");
   return 0;
 }
+
+int test_file_local_filesystem(void)
+{
+  http_localfs_init();
+  http_file_filesystem_fp_t fp;
+  fp=http_localfs_fopen("/index.html");
+  if(NULL==fp){
+    printf(FAIL"test_file_local_filesystem(1)\r\n");
+    return -1;
+  }
+  fp=http_localfs_fopen("/jibberish");
+  if(NULL!=fp){
+    printf(FAIL"test_file_local_filesystem(2)\r\n");
+    return -1;
+  }
+
+  printf(PASS"test_file_local_filesystem\r\n");
+  return 0;
+}
+
 int main(void)
 {
   //testing request method and path parsing
@@ -653,6 +675,8 @@ int main(void)
     retval = -6;
   if (0 != test_response_header())
     retval = -7;
+  if (0 != test_file_local_filesystem())
+    retval = -8;
   if (0 == retval)
   {
     printf(PASS "****************ALL TESTS PASSED****************\r\n\r\n");
