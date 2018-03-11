@@ -203,18 +203,20 @@ typedef struct
         - responseCode    :  response_code_t typed response code to send back
         - headerBuffer    :  buffer to be used to pack response header
         - bufferLength    :  length of headerBuffer
-        - chunkedEncoding : set to 1 to omit content length and set transfer encoding to chunked
+        - transferEncoding : set to transferEnc_none at init. set to transferEnc_chunked for chunked encoding
     OUT: 
         HTTP_SUCCESS on success
         value <0 on failure
 */
-
 int http_response_response_header(HTTP_response_headerRequest_t headerRequest);
 
 /*function to map path to file type extension of type http_response_fileType_t*/
 http_response_fileType_t http_response_getFileType(char *requestPath);
 
+/*function to identify content type of a fileType using default mappings. */
 http_response_contenttype_t http_response_get_contentType_string(http_response_fileType_t fileType, char *buffer, unsigned int bufferLength);
+
+/*function to convert a content type to string*/
 int http_response_contentTypeToString(http_response_contenttype_t contentType, char *buffer, unsigned int length);
 
 #endif
