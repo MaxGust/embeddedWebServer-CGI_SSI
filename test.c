@@ -97,7 +97,6 @@ int test_SSIStringRegistration(void)
   char *testSSIString2 = "sysStatus";
   char *testSSIString3 = "resetStatus";
 
-  char debugTablePrint = 0;
   http_SSI_replacer_t *SSIReplacementHandle1;
   SSIReplacementHandle1 = http_SSI_register_replacer(testSSIString1, timerVal_SSI_replacer_cb);
   if (NULL == SSIReplacementHandle1)
@@ -105,8 +104,10 @@ int test_SSIStringRegistration(void)
     printf(FAIL "test_SSIStringRegistration(1)");
     return -1;
   }
-  if (0 != debugTablePrint)
+  
+#ifdef test_debugTablePrint
     http_SSI_printReplacerTable();
+#endif 
 
   http_SSI_replacer_t *SSIReplacementHandle2;
   SSIReplacementHandle2 = http_SSI_register_replacer(testSSIString2, sysStatus_SSI_replacer_cb);
@@ -115,8 +116,9 @@ int test_SSIStringRegistration(void)
     printf(FAIL "test_SSIStringRegistration(2)");
     return -1;
   }
-  if (0 != debugTablePrint)
+#ifdef test_debugTablePrint
     http_SSI_printReplacerTable();
+#endif 
 
   http_SSI_replacer_t *SSIReplacementHandle3;
   SSIReplacementHandle3 = http_SSI_register_replacer(testSSIString3, resetStatus_SSI_replacer_cb);
@@ -125,12 +127,15 @@ int test_SSIStringRegistration(void)
     printf(FAIL "test_SSIStringRegistration(3)");
     return -1;
   }
-  if (0 != debugTablePrint)
+  
+#ifdef test_debugTablePrint
     http_SSI_printReplacerTable();
+#endif 
 
   http_SSI_deRegister_replacer(SSIReplacementHandle2);
-  if (0 != debugTablePrint)
+#ifdef test_debugTablePrint
     http_SSI_printReplacerTable();
+#endif 
 
   //multiple registrations of the same CB
   SSIReplacementHandle2 = http_SSI_register_replacer(testSSIString3, resetStatus_SSI_replacer_cb);
@@ -139,8 +144,10 @@ int test_SSIStringRegistration(void)
     printf(FAIL "test_SSIStringRegistration(4)");
     return -1;
   }
-  if (0 != debugTablePrint)
+  
+#ifdef test_debugTablePrint
     http_SSI_printReplacerTable();
+#endif 
 
   printf(PASS "test_SSIStringRegistration\r\n");
   return 0;
@@ -213,7 +220,6 @@ int test_CGI_registration(void)
   char *cgiPath2 = "/bin/exec2.sh";
   char *cgiPath3 = "/exec3.exe";
 
-  char debugTablePrint = 0;
   http_CGI_pathFunction_t *cgiPathHandle1;
   cgiPathHandle1 = http_CGI_register_pathFunction(cgiPath1, exec1_CGI_cb);
   if (NULL == cgiPathHandle1)
@@ -221,8 +227,9 @@ int test_CGI_registration(void)
     printf(FAIL "test_CGI(1)");
     return -1;
   }
-  if (0 != debugTablePrint)
+#ifdef tesst_printPathFunctionTable
     http_CGI_printPathFunctionTable();
+#endif
 
   http_CGI_pathFunction_t *cgiPathHandle2;
   cgiPathHandle2 = http_CGI_register_pathFunction(cgiPath2, exec2_CGI_cb);
@@ -231,8 +238,9 @@ int test_CGI_registration(void)
     printf(FAIL "test_CGI(2)");
     return -1;
   }
-  if (0 != debugTablePrint)
+#ifdef tesst_printPathFunctionTable
     http_CGI_printPathFunctionTable();
+#endif
 
   http_CGI_pathFunction_t *cgiPathHandle3;
   cgiPathHandle3 = http_CGI_register_pathFunction(cgiPath3, exec3_CGI_cb);
@@ -241,12 +249,14 @@ int test_CGI_registration(void)
     printf(FAIL "test_CGI(3)");
     return -1;
   }
-  if (0 != debugTablePrint)
+#ifdef tesst_printPathFunctionTable
     http_CGI_printPathFunctionTable();
+#endif
 
   http_CGI_deRegister_pathFunction(cgiPathHandle2);
-  if (0 != debugTablePrint)
+#ifdef tesst_printPathFunctionTable
     http_CGI_printPathFunctionTable();
+#endif
 
   //multiple registrations of the same CB
   cgiPathHandle2 = http_CGI_register_pathFunction(cgiPath3, exec3_CGI_cb);
@@ -255,8 +265,9 @@ int test_CGI_registration(void)
     printf(FAIL "test_CGI(4)");
     return -1;
   }
-  if (0 != debugTablePrint)
+#ifdef tesst_printPathFunctionTable
     http_CGI_printPathFunctionTable();
+#endif
 
   printf(PASS "test_CGI\r\n");
   return 0;
