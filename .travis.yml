@@ -4,8 +4,8 @@ compiler:
   - gcc
 
 env:
-  - ENV="-pedantic"
-  - ENV=" "
-matrix:
-  - DEBUG="-DDEBUG_ERROR=1 "
   - DEBUG="-DDEBUG_ERROR=0 "
+  - DEBUG="-DDEBUG_ERROR=1 "
+  - ENV="-pedantic -Werror" DEBUG="-DDEBUG_ERROR=1 "
+  - ENV="-pedantic -Werror" DEBUG="-DDEBUG_ERROR=0 "
+    
