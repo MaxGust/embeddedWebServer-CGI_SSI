@@ -10,7 +10,7 @@ http_response_fileType_t http_response_getFileType(char *requestPath)
     fileType = strrchr(requestPath, '.');
     if (0 == fileType)
     {
-        PRINT_ERROR("File type  unknown\r\n");
+        PRINT_ERROR("File type  unknown(%s)\r\n",requestPath);
         return HTTP_fileType_unknown;
     }
 
@@ -61,7 +61,7 @@ http_response_fileType_t http_response_getFileType(char *requestPath)
     else
         return HTTP_fileType_unknown;
 
-    PRINT_ERROR("unhandled condition\r\n");
+    PRINT_ERROR("unhandled condition(%s)\r\n",requestPath);
     return HTTP_FAILURE;
 }
 
@@ -69,7 +69,7 @@ http_response_contenttype_t http_response_get_contentType_string(http_response_f
 {
     if ((NULL == buffer) || (bufferLength <= 0))
     {
-        PRINT_ERROR("NULL buffer or zero length\r\n");
+        PRINT_ERROR("NULL buffer or zero length(%d)\r\n",bufferLength);
         return HTTP_FAILURE;
     }
     else
@@ -158,7 +158,7 @@ http_response_contenttype_t http_response_get_contentType_string(http_response_f
         }
     }
 
-    PRINT_ERROR("unhandled condition\r\n");
+    PRINT_ERROR("unhandled condition(%d)\r\n",fileType);
     return HTTP_FAILURE;
 }
 
@@ -166,7 +166,7 @@ int http_response_contentTypeToString(http_response_contenttype_t contentType, c
 {
     if ((NULL == buffer) || (0 == length))
     {
-        PRINT_ERROR("NULL buffer or 0 length");
+        PRINT_ERROR("NULL buffer or 0 length(%d)\r\n",length);
         return HTTP_FAILURE;
     }
 
@@ -239,12 +239,12 @@ int http_response_contentTypeToString(http_response_contenttype_t contentType, c
     }
     default:
     {
-        PRINT_ERROR("unhandled case. passing default\r\n");
+        PRINT_ERROR("unhandled case. passing default(%d)\r\n",contentType);
         strncpy(buffer, HTTP_RES_CONTENT_TYPE_PLAINTEXT, length);
     }
     }
 
-    PRINT_ERROR("unhandled case\r\n");
+    PRINT_ERROR("unhandled case(%d)\r\n",contentType);
     return HTTP_SUCCESS;
 }
 
@@ -261,7 +261,7 @@ int http_response_response_header(HTTP_response_headerRequest_t headerRequest)
 {
     if ((NULL == headerRequest.headerBuffer) || (headerRequest.bufferLength <= 0))
     {
-        PRINT_ERROR(" null buffer or 0 length");
+        PRINT_ERROR(" null buffer or 0 length(%d)\r\n",(int)headerRequest.bufferLength);
         return HTTP_FAILURE;
     }
 
@@ -327,7 +327,7 @@ int http_response_response_header(HTTP_response_headerRequest_t headerRequest)
     }
     default:
     {
-        PRINT_ERROR("default case. passing default\r\n");
+        PRINT_ERROR("default case. passing default\r\n(%d)",(int)headerRequest.responseCode);
         snprintf(responseLine, HTTP_RESPONSE_LINE1_LENGTH, HTTP_RES_HTTP_VERSION " " HTTP_RESSTRING_SERROR_NOTIMPLEMENTED);
         break;
     }
@@ -344,7 +344,7 @@ int http_response_response_header(HTTP_response_headerRequest_t headerRequest)
         retval = http_response_get_contentType_string(fileType, lcontentTypeLine, HTTP_RESPONSE_CONTTYPE_LENGTH);
         if (retval < 0)
         {
-            PRINT_ERROR("error converting contentType to string\r\n");
+            PRINT_ERROR("error converting contentType to string(%d)\r\n",(int)fileType);
         }
         snprintf(contentTypeLine, HTTP_RESPONSE_CONTTYPE_LENGTH, HTTP_RESHEADER_CONTENT_TYPE ": %s", lcontentTypeLine);
         contentTypeLineDone = 1;
@@ -356,7 +356,7 @@ int http_response_response_header(HTTP_response_headerRequest_t headerRequest)
         retVal = http_response_contentTypeToString(headerRequest.contentType, lcontentTypeLine, HTTP_RESPONSE_CONTTYPE_LENGTH);
         if (retVal < 0)
         {
-            PRINT_ERROR("error converting contentType to string\r\n");
+            PRINT_ERROR("error converting contentType to string(%d)\r\n",(int)headerRequest.contentType);
         }
         snprintf(contentTypeLine, HTTP_RESPONSE_CONTTYPE_LENGTH, HTTP_RESHEADER_CONTENT_TYPE ": %s", lcontentTypeLine);
         contentTypeLineDone = 1;
@@ -379,7 +379,7 @@ int http_response_response_header(HTTP_response_headerRequest_t headerRequest)
 
     //final Assembly
     if(headerRequest.bufferLength<(strlen(responseLine)+strlen(contentTypeLine)+strlen(contentLengthLine))){
-        PRINT_ERROR("total header length > provided buffer\r\n");
+        PRINT_ERROR("total header length > provided buffer(%d)\r\n",(int)(strlen(responseLine)+strlen(contentTypeLine)+strlen(contentLengthLine)));
         return HTTP_FAILURE;
     }
 

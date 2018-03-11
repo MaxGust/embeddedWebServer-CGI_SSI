@@ -54,7 +54,7 @@ int http_localfs_registerFile(const char *filePath, char *file, unsigned int fil
     }
     else
     {
-        PRINT_ERROR("fileSystem Full\r\n");
+        PRINT_ERROR("fileSystem Full(%d)\r\n",fileIndex);
         return HTTP_FAILURE;
     }
 }
