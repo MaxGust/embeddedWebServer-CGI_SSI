@@ -5,7 +5,9 @@
 #define HTTP_RESPONSE_CONTTYPE_LENGTH (unsigned int)50
 #define HTTP_RESPONSE_CONLEN_LENGTH (unsigned int)50
 
-/*response code mappings. Ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status*/
+/*response code mappings. Ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+  These strings will sent back along with HTTP version and additional response headers. 
+*/
 #define HTTP_RESSTRING_INFO_CONTINUE "100 Continue"
 #define HTTP_RESSTRING_INFO_SWITCHING "101 Switching Protocol"
 //SUCCESS codes
@@ -57,6 +59,7 @@
 #define HTTP_RESSTRING_SERROR_HTTPVERERROR "505 HTTP Version Not Supported"
 #define HTTP_RESSTRING_SERROR_NETAUTHREQD "511 Network Authentication Required"
 
+//enum mapping of HTTP response codes. 
 typedef enum {
     HTTP_RESCODE_infoContinue = 100,
     HTTP_RESCODE_infoSwitching = 101,
@@ -104,8 +107,12 @@ typedef enum {
     HTTP_RESCODE_serrorGatewaytimeout = 504,
     HTTP_RESCODE_serrorHttpvererror = 505,
     HTTP_RESCODE_serrorNetauthreqd = 511
-} http_response_code_t;
+} http_response_code_t;  
 
+/*enum mapping of supported file types. When adding a new file type here, also modify 
+    - http_response_getFileType() to map a file extension to teh new type
+    - http_response_get_contentType_string() to map the new fileType to a mime content type
+*/
 typedef enum {
     HTTP_fileType_unknown = 0,
     HTTP_fileType_SHTML = 1,
@@ -130,6 +137,7 @@ typedef enum {
     HTTP_fileType_ZIP
 } http_response_fileType_t;
 
+/*enum holding current content types*/
 typedef enum {
     HTTP_contentType_unknown = 0,
     HTTP_contentType_plaintext,
@@ -146,7 +154,7 @@ typedef enum {
     HTTP_contentType_ico
 } http_response_contenttype_t;
 
-//HTTP content types. not makign these static string to avoid program memory size
+//HTTP content type strings to map http_response_contenttype_t
 #define HTTP_RES_CONTENT_TYPE_PLAINTEXT "text/plain"
 #define HTTP_RES_CONTENT_TYPE_HTML "text/html"
 #define HTTP_RES_CONTENT_TYPE_CSS "text/css"
@@ -160,30 +168,42 @@ typedef enum {
 #define HTTP_RES_CONTENT_TYPE_BIN "application/octet-stream"
 #define HTTP_RES_CONTENT_TYPE_ICO "image/x-icon"
 
-//header strings
+//currently supported header strings
 #define HTTP_RES_HTTP_VERSION "HTTP/1.1"
 #define HTTP_RESHEADER_CONTENT_LENGTH "Content-Length"
 #define HTTP_RESHEADER_CONTENT_TYPE "Content-Type"
 #define HTTP_RESHEADER_TRANSFER_ENCODING "Transfer-Encoding"
 
+//ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Transfer-Encoding
+typedef enum
+{
+    transferEnc_none=0,
+    transferEnc_chunked=1,
+    transferEnc_compress,
+    transferEnc_deflate,
+    transferEnc_gzip,
+    transferEnc_identity
+}HTTP_response_transferEncoding_t;
+
+/*structure to process a request to form a response header. This is to be sent before request body.*/
 typedef struct
 {
-    http_response_code_t responseCode;
-    unsigned int bodyLength;
-    char *headerBuffer;
-    unsigned int bufferLength;
-    unsigned char chunkedEncoding;
+    http_response_code_t responseCode;  //required response code. 
+    unsigned int bodyLength;            //body length to added in content length. keep as 0 if using chunked encoding 
+    char *headerBuffer;                 //buffer to populate the return header result 
+    unsigned int bufferLength;          //length of the buffer being passed in. 
+    HTTP_response_transferEncoding_t transferEncoding;      // transfer encoding to be used . currently supporting only chunked. 
     char *filePath;
     http_response_contenttype_t contentType;
-
 } HTTP_response_headerRequest_t;
 
 /*function to create a response header
     IN: 
-        - responseBody   :  string buffer containing response to be sent out. can be NULL for responses without contents
-        - responseCode   :  response_code_t typed response code to send back
-        - headerBuffer   :  buffer to be used to pack response header
-        - buffer length  :  length of headerBuffer
+        - responseBody    :  string buffer containing response to be sent out. can be NULL for responses without contents
+        - responseCode    :  response_code_t typed response code to send back
+        - headerBuffer    :  buffer to be used to pack response header
+        - bufferLength    :  length of headerBuffer
+        - chunkedEncoding : set to 1 to omit content length and set transfer encoding to chunked
     OUT: 
         HTTP_SUCCESS on success
         value <0 on failure

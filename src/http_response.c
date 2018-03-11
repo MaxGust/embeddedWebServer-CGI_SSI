@@ -249,7 +249,7 @@ int http_response_contentTypeToString(http_response_contenttype_t contentType, c
 }
 
 /*- responseBody can be NULL for responses that does not have a body
-  - if chunkedEncoding is set to 1 , contentLength will be omitted from response.
+  - if transferEncoding is set to transferEnc_chunked , contentLength will be omitted from response.
     - so, budy need not be passed. 
   - either path or response contents type can be provided (both are optional , both can be null)
     - if path is provided, response content type will be computed from the extension and responseContentType argument is ignored
@@ -362,17 +362,17 @@ int http_response_response_header(HTTP_response_headerRequest_t headerRequest)
         contentTypeLineDone = 1;
     }
 
-    //handle content length
+    //handle content length and transfer encoding. 
     if (0 != headerRequest.bodyLength) //content length is applicable only when there is content
     {
-        if (0 == headerRequest.chunkedEncoding)
+        if (transferEnc_chunked == headerRequest.transferEncoding)
         {
-            snprintf(contentLengthLine, HTTP_RESPONSE_CONLEN_LENGTH, HTTP_RESHEADER_CONTENT_LENGTH ": %d", headerRequest.bodyLength);
+            snprintf(contentLengthLine, HTTP_RESPONSE_CONLEN_LENGTH, HTTP_RESHEADER_TRANSFER_ENCODING ": chunked");
             contentLengthLineDone = 1;
         }
         else
         {
-            snprintf(contentLengthLine, HTTP_RESPONSE_CONLEN_LENGTH, HTTP_RESHEADER_CONTENT_LENGTH ": chunked");
+            snprintf(contentLengthLine, HTTP_RESPONSE_CONLEN_LENGTH, HTTP_RESHEADER_CONTENT_LENGTH ": %d", headerRequest.bodyLength);
             contentLengthLineDone = 1;
         }
     }

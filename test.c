@@ -7,7 +7,7 @@
 #include "http_SSI_replacer.h"
 #include "http_cgi.h"
 #include "http_response.h"
-#include "http_file_local_filesystem.h"
+#include "http_local_filesystem.h"
 
 #define PASS "\x1B[1;32mPASS:\x1B[0m\t"
 #define FAIL "\x1B[1;31mFAIL:\x1B[0m\t"
@@ -588,7 +588,7 @@ int test_response_header(void)
   headerRequest.bodyLength = 1024;
   headerRequest.headerBuffer = (char *)&headerBuffer;
   headerRequest.bufferLength = 300;
-  headerRequest.chunkedEncoding = 0;
+  headerRequest.transferEncoding = transferEnc_none;
   headerRequest.filePath = "/index.html";
 
   http_response_response_header(headerRequest);
@@ -596,6 +596,7 @@ int test_response_header(void)
   char *expectedResponse1 = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 1024\r\n\r\n";
   if (0 != strcmp(headerBuffer, expectedResponse1))
   {
+    printf("%s\r\n",headerBuffer);
     printf(FAIL "test_response_header(1)\r\n");
     return -1;
   }
@@ -613,10 +614,10 @@ int test_response_header(void)
   }
 
   //test chunked encoding with a different response code
-  headerRequest.chunkedEncoding = 1;
+  headerRequest.transferEncoding = transferEnc_chunked;
   headerRequest.responseCode = HTTP_RESCODE_cerrorNotfound;
   http_response_response_header(headerRequest);
-  char *expectedResponse3 = "HTTP/1.1 404 Not Found\r\nContent-Type: application/octet-stream\r\nContent-Length: chunked\r\n\r\n";
+  char *expectedResponse3 = "HTTP/1.1 404 Not Found\r\nContent-Type: application/octet-stream\r\nTransfer-Encoding: chunked\r\n\r\n";
 
   if (0 != strcmp(headerBuffer, expectedResponse3))
   {

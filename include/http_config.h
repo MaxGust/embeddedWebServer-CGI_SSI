@@ -14,4 +14,7 @@
 //Max number of CGIs supported
 #define HTTP_MAX_CGI_SIZE 5
 
+//populate a default index for local FS
+#define HTTP_LOCALFS_INDEX
+
 #endif
