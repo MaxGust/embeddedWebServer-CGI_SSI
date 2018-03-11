@@ -82,6 +82,8 @@ void http_CGI_deRegister_all(void)
     }
 }
 
+//temporarily commented off to fix pedantic errors. Not major since this is this is a test function. ISSUE #2
+#ifdef HTTP_REPLACER_TABLE_DEBUG_PRINTF
 //test function to print complete registration table. to be used only for debugging
 void http_CGI_printPathFunctionTable(void)
 {
@@ -94,3 +96,4 @@ void http_CGI_printPathFunctionTable(void)
     }
     printf("==============================================================\r\n");
 }
+#endif

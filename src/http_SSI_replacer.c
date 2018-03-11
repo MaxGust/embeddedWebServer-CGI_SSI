@@ -82,6 +82,8 @@ void http_SSI_deRegister_all(void)
     }
 }
 
+//temporarily commented off to fix pedantic errors. Not major since this is this is a test function. Issue #2
+#ifdef HTTP_REPLACER_TABLE_DEBUG_PRINTF
 //test function to print complete registration table. to be used only for debugging
 void http_SSI_printReplacerTable(void)
 {
@@ -94,3 +96,4 @@ void http_SSI_printReplacerTable(void)
     }
     printf("==============================================================\r\n");
 }
+#endif
