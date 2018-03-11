@@ -2,3 +2,10 @@ language: c
 compiler:
   - clang
   - gcc
+
+env:
+  - ENV="-pedantic"
+  - ENV=" "
+matrix:
+  - DEBUG="-DDEBUG_ERROR=1 "
+  - DEBUG="-DDEBUG_ERROR=0 "
