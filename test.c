@@ -596,7 +596,7 @@ int test_response_header(void)
   char *expectedResponse1 = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 1024\r\n\r\n";
   if (0 != strcmp(headerBuffer, expectedResponse1))
   {
-    printf("%s\r\n",headerBuffer);
+    printf("%s\r\n", headerBuffer);
     printf(FAIL "test_response_header(1)\r\n");
     return -1;
   }
@@ -627,8 +627,9 @@ int test_response_header(void)
 
   //test small input buffer
   headerRequest.bufferLength = 3;
-  int retval=http_response_response_header(headerRequest);
-  if(retval>=0){
+  int retval = http_response_response_header(headerRequest);
+  if (retval >= 0)
+  {
     printf(FAIL "test_response_header(4)\r\n");
   }
 
@@ -641,18 +642,69 @@ int test_file_local_filesystem(void)
 {
   http_localfs_init();
   http_file_filesystem_fp_t fp;
-  fp=http_localfs_fopen("/index.html");
-  if(NULL==fp){
-    printf(FAIL"test_file_local_filesystem(1)\r\n");
-    return -1;
-  }
-  fp=http_localfs_fopen("/jibberish");
-  if(NULL!=fp){
-    printf(FAIL"test_file_local_filesystem(2)\r\n");
+
+  //test fopen
+  fp = http_localfs_fopen("/index.html");
+  if (NULL == fp)
+  {
+    printf(FAIL "test_file_local_filesystem(fopen index)\r\n");
     return -1;
   }
 
-  printf(PASS"test_file_local_filesystem\r\n");
+  //copy of index contents
+  unsigned char index_html[] = {
+      0x3c, 0x68, 0x74, 0x6d, 0x6c, 0x3e, 0x0a, 0x20, 0x20, 0x3c, 0x62, 0x6f,
+      0x64, 0x79, 0x3e, 0x0a, 0x20, 0x20, 0x20, 0x20, 0x3c, 0x48, 0x31, 0x3e,
+      0x48, 0x45, 0x4c, 0x4c, 0x4f, 0x20, 0x57, 0x4f, 0x52, 0x4c, 0x44, 0x3c,
+      0x2f, 0x48, 0x31, 0x3e, 0x0a, 0x20, 0x20, 0x3c, 0x2f, 0x62, 0x6f, 0x64,
+      0x79, 0x3e, 0x0a, 0x3c, 0x2f, 0x68, 0x74, 0x6d, 0x6c, 0x3e, 0x0a};
+  unsigned int index_html_len = 59;
+
+  //test content length using feof
+  unsigned int i = 1;
+  while (-1 != http_localfs_feof(fp))
+  {
+    http_localfs_fgetc(fp);
+    i++;
+  }
+  if (index_html_len != i)
+  { //hard coded length of index file
+    printf(FAIL "test_file_local_filesystem(content length(%d!=%d))\r\n", index_html_len, i);
+    return -1;
+  }
+  http_localfs_fclose(fp);
+
+  //test contents
+  unsigned char fileContents[index_html_len];
+  fp = http_localfs_fopen("/index.html");
+  i = 0;
+  while (-1 != http_localfs_feof(fp))
+  {
+    fileContents[i] = (unsigned char)http_localfs_fgetc(fp);
+    i++;
+  }
+  if (0 != strncmp((const char *)index_html, (const char *)fileContents, index_html_len - 1))
+  {
+    printf(FAIL "test_file_local_filesystem(content comparison)\r\n");
+  }
+  http_localfs_fclose(fp);
+
+  //test to open nonexistant file
+  fp = http_localfs_fopen("/jibberish");
+  if (NULL != fp)
+  {
+    printf(FAIL "test_file_local_filesystem(fopen Jibberish)\r\n");
+    return -1;
+  }
+
+  //test to close null FP
+  if (HTTP_SUCCESS == http_localfs_fclose(fp))
+  {
+    printf(FAIL "test_file_local_filesystem(fclose Jibberish)\r\n");
+    return -1;
+  }
+
+  printf(PASS "test_file_local_filesystem\r\n");
   return 0;
 }
 
