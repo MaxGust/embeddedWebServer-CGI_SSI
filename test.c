@@ -727,7 +727,7 @@ int test_file_local_filesystem(void)
 
   //ty rto read more contents than remaining
   readLength= http_localfs_fread((void *)&fileReadBuffer, 100, 1 , fp);
-  if (readLength!=index1_html_len-56){
+  if ((unsigned int)readLength!=index1_html_len-56){
     printf(FAIL "test_file_local_filesystem(remaining read content length)\r\n");
   }
   printf(PASS "test_file_local_filesystem(read - remaining content length)\r\n");
