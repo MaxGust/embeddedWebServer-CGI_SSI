@@ -31,7 +31,7 @@ http_CGI_pathFunctionHandle_t http_CGI_register_pathFunction(const char *CGIPath
     //find a uninitialized array element
     if ((NULL == CGIPath) || (NULL == CGIPathFunctionCb))
     {
-        PRINT_ERROR("ERROR: http_CGI_register_pathFunction - NULL CGIPath or CB (%p)\r\n",(void*)CGIPath);
+        PRINT_ERROR("ERROR: http_CGI_register_pathFunction - NULL CGIPath or CB (%p)\r\n", (void *)CGIPath);
         return 0;
     }
     else
@@ -50,7 +50,7 @@ http_CGI_pathFunctionHandle_t http_CGI_register_pathFunction(const char *CGIPath
                 return &CGI_path[i];
             }
         }
-        PRINT_ERROR("ERROR: http_CGI_register_pathFunction - no more slots to register(%d)\r\n",i);
+        PRINT_ERROR("ERROR: http_CGI_register_pathFunction - no more slots to register(%d)\r\n", i);
         return NULL;
     }
     return NULL; //Just a safety net.

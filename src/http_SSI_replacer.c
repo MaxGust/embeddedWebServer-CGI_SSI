@@ -31,7 +31,7 @@ http_SSI_replacerHandle_t http_SSI_register_replacer(const char *SSIString, http
     //find a uninitialized array element
     if ((NULL == SSIString) || (NULL == SSIReplacerCb))
     {
-        PRINT_ERROR("NULL SSIString or CB (%p) \r\n",(void*) SSIString);
+        PRINT_ERROR("NULL SSIString or CB (%p) \r\n", (void *)SSIString);
         return 0;
     }
     else
@@ -50,7 +50,7 @@ http_SSI_replacerHandle_t http_SSI_register_replacer(const char *SSIString, http
                 return &http_SSI_replacer[i];
             }
         }
-        PRINT_ERROR("no more slots to register(%d)\r\n",i);
+        PRINT_ERROR("no more slots to register(%d)\r\n", i);
         return NULL;
     }
     return NULL; //Just a safety net.

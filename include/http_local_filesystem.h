@@ -11,7 +11,7 @@ typedef struct
     const char *filePath;                 //path string for reverse searching
     unsigned int fileNumber;              //index of this file into the file system array
     char *file;                           //actual file contents as a char array
-    long int fileLength;              //length of teh file contents array
+    long int fileLength;                  //length of teh file contents array
     http_response_fileType_t optFileType; //optional field to hold mime file type. this may be useful to indicate alternate mime type.
 } http_file_filesystem_file_t;
 

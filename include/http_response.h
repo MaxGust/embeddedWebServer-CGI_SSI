@@ -59,7 +59,7 @@
 #define HTTP_RESSTRING_SERROR_HTTPVERERROR "505 HTTP Version Not Supported"
 #define HTTP_RESSTRING_SERROR_NETAUTHREQD "511 Network Authentication Required"
 
-//enum mapping of HTTP response codes. 
+//enum mapping of HTTP response codes.
 typedef enum {
     HTTP_RESCODE_infoContinue = 100,
     HTTP_RESCODE_infoSwitching = 101,
@@ -107,7 +107,7 @@ typedef enum {
     HTTP_RESCODE_serrorGatewaytimeout = 504,
     HTTP_RESCODE_serrorHttpvererror = 505,
     HTTP_RESCODE_serrorNetauthreqd = 511
-} http_response_code_t;  
+} http_response_code_t;
 
 /*enum mapping of supported file types. When adding a new file type here, also modify 
     - http_response_getFileType() to map a file extension to teh new type
@@ -175,24 +175,23 @@ typedef enum {
 #define HTTP_RESHEADER_TRANSFER_ENCODING "Transfer-Encoding"
 
 //ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Transfer-Encoding
-typedef enum
-{
-    transferEnc_none=0,
-    transferEnc_chunked=1,
+typedef enum {
+    transferEnc_none = 0,
+    transferEnc_chunked = 1,
     transferEnc_compress,
     transferEnc_deflate,
     transferEnc_gzip,
     transferEnc_identity
-}HTTP_response_transferEncoding_t;
+} HTTP_response_transferEncoding_t;
 
 /*structure to process a request to form a response header. This is to be sent before request body.*/
 typedef struct
 {
-    http_response_code_t responseCode;  //required response code. 
-    unsigned int bodyLength;            //body length to added in content length. keep as 0 if using chunked encoding 
-    char *headerBuffer;                 //buffer to populate the return header result 
-    unsigned int bufferLength;          //length of the buffer being passed in. 
-    HTTP_response_transferEncoding_t transferEncoding;      // transfer encoding to be used . currently supporting only chunked. 
+    http_response_code_t responseCode;                 //required response code.
+    unsigned int bodyLength;                           //body length to added in content length. keep as 0 if using chunked encoding
+    char *headerBuffer;                                //buffer to populate the return header result
+    unsigned int bufferLength;                         //length of the buffer being passed in.
+    HTTP_response_transferEncoding_t transferEncoding; // transfer encoding to be used . currently supporting only chunked.
     char *filePath;
     http_response_contenttype_t contentType;
 } HTTP_response_headerRequest_t;

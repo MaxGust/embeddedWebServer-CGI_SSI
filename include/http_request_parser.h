@@ -15,14 +15,14 @@ typedef enum {
     CONNECT,
     TRACE,
     PATCH
-} httpRequest_method_t;   //enum to map HTTP request methods 
+} httpRequest_method_t; //enum to map HTTP request methods
 
 //file type indicator
 typedef enum {
     httpFileType_none = 0,
     httpFileType_SSI,
     httpFileType_CGI
-} httpFileType_code_t;   //enum to identify regular, SSI or CGI file types. 
+} httpFileType_code_t; //enum to identify regular, SSI or CGI file types.
 
 //parsed HTTP request
 typedef struct
@@ -30,7 +30,7 @@ typedef struct
     httpFileType_code_t fileType;            //contains the file type
     httpRequest_method_t method;             // contains teh requested method
     char httpFilePath[HTTP_MAX_PATH_LENGTH]; //contains file path
-} http_request_t;  //struct to hold results of parsing a HTTP request. Later header can be added here. 
+} http_request_t;                            //struct to hold results of parsing a HTTP request. Later header can be added here.
 
 /*
 parse and identify a request

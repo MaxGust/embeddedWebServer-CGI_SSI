@@ -10,12 +10,10 @@
 #define http_false 0
 
 #if defined(DEBUG_ERROR) && DEBUG_ERROR > 0
- #define PRINT_ERROR(fmt, ...) fprintf(stderr, "DEBUG: %s:%d:%s(): " fmt, \
-    __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define PRINT_ERROR(fmt, ...) fprintf(stderr, "DEBUG: %s:%d:%s(): " fmt, \
+                                      __FILE__, __LINE__, __func__, ##__VA_ARGS__)
 #else
- #define PRINT_ERROR(fmt, ...) /* Don't do anything in release builds */
+#define PRINT_ERROR(fmt, ...) /* Don't do anything in release builds */
 #endif
-
-
 
 #endif
