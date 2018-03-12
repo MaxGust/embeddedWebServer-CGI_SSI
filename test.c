@@ -39,13 +39,13 @@ int test_methodFileType(void)
   {
     if ((httpFileType_SSI == request.fileType) && (GET == request.method) && (0 == strcmp(request.httpFilePath, "/ta.gs/ref_htt  pmethods.shtm")))
     {
-      printf(PASS "test_methodFileType\r\n");
+      printf(PASS "test_methodFileType (SSI GET)\r\n");
       return 0;
     }
     else
     {
       //printf("result\r\n\tfileType: %d\r\n\tmethod: %d\r\n\tpath:%s\r\n\r\n", request.fileType, request.method, request.httpFilePath);
-      printf(FAIL "test_methodFileType(1)\r\n");
+      printf(FAIL "test_methodFileType(SSI GET)\r\n");
       return -1;
     }
   }
@@ -63,6 +63,7 @@ int timerVal_SSI_replacer_cb(const char *SSIString, char *replacerBuffer, unsign
 {
   if (0 != strcmp("timerVal", SSIString))
   {
+    printf(FAIL "timerVal_SSI_replacer_cb (SSI string missmatch)\r\n");
     return -1;
   }
   strncpy(replacerBuffer, "timerValue is 200", bufferLength);
@@ -73,6 +74,7 @@ int sysStatus_SSI_replacer_cb(const char *SSIString, char *replacerBuffer, unsig
 {
   if (0 != strcmp("sysStatus", SSIString))
   {
+    printf(FAIL "sysStatus_SSI_replacer_cb (SSI string missmatch)\r\n");
     return -1;
   }
   strncpy(replacerBuffer, "System is up and running", bufferLength);
@@ -83,6 +85,7 @@ int resetStatus_SSI_replacer_cb(const char *SSIString, char *replacerBuffer, uns
 {
   if (0 != strcmp("resetStatus", SSIString))
   {
+    printf(FAIL "resetStatus_SSI_replacer_cb (SSI string missmatch)\r\n");
     return -1;
   }
   strncpy(replacerBuffer, "Previous reset caused by Watchdog", bufferLength);
@@ -101,9 +104,10 @@ int test_SSIStringRegistration(void)
   SSIReplacementHandle1 = http_SSI_register_replacer(testSSIString1, timerVal_SSI_replacer_cb);
   if (NULL == SSIReplacementHandle1)
   {
-    printf(FAIL "test_SSIStringRegistration(1)");
+    printf(FAIL "test_SSIStringRegistration(http_SSI_register_replacer 1)");
     return -1;
   }
+  printf(PASS "test_SSIStringRegistration(http_SSI_register_replacer 1)");
 
 #ifdef test_debugTablePrint
   http_SSI_printReplacerTable();
@@ -116,6 +120,7 @@ int test_SSIStringRegistration(void)
     printf(FAIL "test_SSIStringRegistration(2)");
     return -1;
   }
+  printf(PASS "test_SSIStringRegistration(http_SSI_register_replacer 2)");
 #ifdef test_debugTablePrint
   http_SSI_printReplacerTable();
 #endif
@@ -127,6 +132,7 @@ int test_SSIStringRegistration(void)
     printf(FAIL "test_SSIStringRegistration(3)");
     return -1;
   }
+  printf(PASS "test_SSIStringRegistration(http_SSI_register_replacer 3)");
 
 #ifdef test_debugTablePrint
   http_SSI_printReplacerTable();
@@ -144,12 +150,13 @@ int test_SSIStringRegistration(void)
     printf(FAIL "test_SSIStringRegistration(4)");
     return -1;
   }
+  printf(PASS "test_SSIStringRegistration(register after deregister)");
 
 #ifdef test_debugTablePrint
   http_SSI_printReplacerTable();
 #endif
 
-  printf(PASS "test_SSIStringRegistration\r\n");
+  printf(PASS ">>test_SSIStringRegistration<<\r\n");
   return 0;
 }
 
