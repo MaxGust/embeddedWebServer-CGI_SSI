@@ -131,7 +131,35 @@ int http_localfs_feof(http_file_filesystem_fp_t fp)
     return 0;
 }
 
-//int http_localfs_fread()
+size_t http_localfs_fread(void *ptr, size_t size, size_t nmemb, http_file_filesystem_fp_t fp)
+{
+    if(NULL==ptr){
+        return HTTP_FAILURE;
+    }
+    //end of file
+    if ((fp->filePosition + 1) == http_local_filesystem[fp->fileNumber].fileLength)
+    {
+        return -1; //EOF
+    }
+    else{
+        //calculate actual amount of data remaining in the file.
+        unsigned int remainingLen=http_local_filesystem[fp->fileNumber].fileLength - (fp->filePosition + 1);
+        //calculate requested data quantity
+        unsigned int totalReadLength=(size*nmemb);
+
+        if(remainingLen<=totalReadLength){//when size is smaller than actual file size
+            memcpy(ptr,(void*)&http_local_filesystem[fp->fileNumber].file[fp->filePosition],remainingLen);
+            fp->filePosition+=remainingLen;
+            return (size_t)remainingLen;
+        }
+        else{
+            memcpy(ptr,(void*)&http_local_filesystem[fp->fileNumber].file[fp->filePosition],totalReadLength);
+            fp->filePosition+=totalReadLength;
+            return (size_t)totalReadLength;
+        }
+    }
+return -1;
+}
 //int http_localfs_ls()
 //ftell
 //fseek

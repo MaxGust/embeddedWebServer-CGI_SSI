@@ -54,4 +54,6 @@ int http_localfs_fgetc(http_file_filesystem_fp_t fp);
 //generic feof function. returns -1 if EOF
 int http_localfs_feof(http_file_filesystem_fp_t fp);
 
+//fread implementation for local file system
+size_t http_localfs_fread(void *ptr, size_t size, size_t nmemb, http_file_filesystem_fp_t fp);
 #endif
