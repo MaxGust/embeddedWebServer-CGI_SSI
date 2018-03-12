@@ -54,7 +54,7 @@ int http_localfs_registerFile(const char *filePath, char *file, unsigned int fil
     }
     else
     {
-        PRINT_ERROR("fileSystem Full(%d)\r\n",fileIndex);
+        PRINT_ERROR("fileSystem Full(%d)\r\n", fileIndex);
         return HTTP_FAILURE;
     }
 }
@@ -133,7 +133,8 @@ int http_localfs_feof(http_file_filesystem_fp_t fp)
 
 size_t http_localfs_fread(void *ptr, size_t size, size_t nmemb, http_file_filesystem_fp_t fp)
 {
-    if(NULL==ptr){
+    if (NULL == ptr)
+    {
         return HTTP_FAILURE;
     }
     //end of file
@@ -141,27 +142,109 @@ size_t http_localfs_fread(void *ptr, size_t size, size_t nmemb, http_file_filesy
     {
         return -1; //EOF
     }
-    else{
+    else
+    {
         //calculate actual amount of data remaining in the file.
-        unsigned int remainingLen=http_local_filesystem[fp->fileNumber].fileLength - (fp->filePosition + 1);
+        unsigned int remainingLen = http_local_filesystem[fp->fileNumber].fileLength - (fp->filePosition + 1);
         //calculate requested data quantity
-        unsigned int totalReadLength=(size*nmemb);
+        unsigned int totalReadLength = (size * nmemb);
 
-        if(remainingLen<=totalReadLength){//when size is smaller than actual file size
-            memcpy(ptr,(void*)&http_local_filesystem[fp->fileNumber].file[fp->filePosition],remainingLen);
-            fp->filePosition+=remainingLen;
+        if (remainingLen <= totalReadLength)
+        { //when size is smaller than actual file size
+            memcpy(ptr, (void *)&http_local_filesystem[fp->fileNumber].file[fp->filePosition], remainingLen);
+            fp->filePosition += remainingLen;
             return (size_t)remainingLen;
         }
-        else{
-            memcpy(ptr,(void*)&http_local_filesystem[fp->fileNumber].file[fp->filePosition],totalReadLength);
-            fp->filePosition+=totalReadLength;
+        else
+        {
+            memcpy(ptr, (void *)&http_local_filesystem[fp->fileNumber].file[fp->filePosition], totalReadLength);
+            fp->filePosition += totalReadLength;
             return (size_t)totalReadLength;
         }
     }
-return -1;
+    return -1;
 }
-//int http_localfs_ls()
-//ftell
-//fseek
-//rewind
-//fileno
+
+//generic fileno function
+int http_localfs_fileno(http_file_filesystem_fp_t fp)
+{
+    return fp->fileNumber;
+}
+
+//generic ftell function
+long http_localfs_ftell(http_file_filesystem_fp_t fp)
+{
+    return (long)fp->filePosition;
+}
+
+//generic rewind function
+void http_localfs_rewind(http_file_filesystem_fp_t fp)
+{
+    fp->filePosition = 0;
+}
+
+//Generic fseek function
+// TODO: reusing  SEEK_SET, SEEK_CUR, and SEEK_END from stdio. need to see if this will work on embedded platforms
+int http_localfs_fseek(http_file_filesystem_fp_t fp, long offset, int whence)
+{
+    if (NULL == fp)
+    {
+        return -1;
+    }
+    switch (whence)
+    {
+    case SEEK_SET:
+    {
+        if (offset >= 0 && offset <= (http_local_filesystem[fp->fileNumber].fileLength - 1))
+        {
+            fp->filePosition = offset;
+            return 0;
+        }
+        else if (offset >= 0)
+        {
+            fp->filePosition = http_local_filesystem[fp->fileNumber].fileLength - 1;
+            return 0;
+        }
+        else
+        {
+            return -1;
+        }
+        break;
+    }
+    case SEEK_CUR:
+    {
+        if (((fp->filePosition + offset) >= 0) && ((fp->filePosition + offset) < http_local_filesystem[fp->fileNumber].fileLength))
+        {
+            fp->filePosition += offset;
+            return 0;
+        }
+        else
+        {
+            return -1;
+        }
+        break;
+    }
+    case SEEK_END:
+    {
+        if (offset > 0)
+        {
+            return -1;
+        }
+        else if ((fp->filePosition + offset) >= 0)
+        {
+            fp->filePosition += offset;
+            return 0;
+        }
+        else
+        {
+            fp->filePosition = 0;
+            return 0;
+        }
+        break;
+    }
+    default:
+        return -1;
+        break;
+    }
+    return -1;
+}

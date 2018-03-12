@@ -11,7 +11,7 @@ typedef struct
     const char *filePath;                 //path string for reverse searching
     unsigned int fileNumber;              //index of this file into the file system array
     char *file;                           //actual file contents as a char array
-    unsigned int fileLength;              //length of teh file contents array
+    long int fileLength;              //length of teh file contents array
     http_response_fileType_t optFileType; //optional field to hold mime file type. this may be useful to indicate alternate mime type.
 } http_file_filesystem_file_t;
 
@@ -56,4 +56,16 @@ int http_localfs_feof(http_file_filesystem_fp_t fp);
 
 //fread implementation for local file system
 size_t http_localfs_fread(void *ptr, size_t size, size_t nmemb, http_file_filesystem_fp_t fp);
+
+//generic fileno function
+int http_localfs_fileno(http_file_filesystem_fp_t fp);
+
+//generic ftell function
+long http_localfs_ftell(http_file_filesystem_fp_t fp);
+
+//generic rewind function
+void http_localfs_rewind(http_file_filesystem_fp_t fp);
+
+//generic fseek
+int http_localfs_fseek(http_file_filesystem_fp_t fp, long offset, int whence);
 #endif

@@ -104,10 +104,10 @@ int test_SSIStringRegistration(void)
     printf(FAIL "test_SSIStringRegistration(1)");
     return -1;
   }
-  
+
 #ifdef test_debugTablePrint
-    http_SSI_printReplacerTable();
-#endif 
+  http_SSI_printReplacerTable();
+#endif
 
   http_SSI_replacer_t *SSIReplacementHandle2;
   SSIReplacementHandle2 = http_SSI_register_replacer(testSSIString2, sysStatus_SSI_replacer_cb);
@@ -117,8 +117,8 @@ int test_SSIStringRegistration(void)
     return -1;
   }
 #ifdef test_debugTablePrint
-    http_SSI_printReplacerTable();
-#endif 
+  http_SSI_printReplacerTable();
+#endif
 
   http_SSI_replacer_t *SSIReplacementHandle3;
   SSIReplacementHandle3 = http_SSI_register_replacer(testSSIString3, resetStatus_SSI_replacer_cb);
@@ -127,15 +127,15 @@ int test_SSIStringRegistration(void)
     printf(FAIL "test_SSIStringRegistration(3)");
     return -1;
   }
-  
+
 #ifdef test_debugTablePrint
-    http_SSI_printReplacerTable();
-#endif 
+  http_SSI_printReplacerTable();
+#endif
 
   http_SSI_deRegister_replacer(SSIReplacementHandle2);
 #ifdef test_debugTablePrint
-    http_SSI_printReplacerTable();
-#endif 
+  http_SSI_printReplacerTable();
+#endif
 
   //multiple registrations of the same CB
   SSIReplacementHandle2 = http_SSI_register_replacer(testSSIString3, resetStatus_SSI_replacer_cb);
@@ -144,10 +144,10 @@ int test_SSIStringRegistration(void)
     printf(FAIL "test_SSIStringRegistration(4)");
     return -1;
   }
-  
+
 #ifdef test_debugTablePrint
-    http_SSI_printReplacerTable();
-#endif 
+  http_SSI_printReplacerTable();
+#endif
 
   printf(PASS "test_SSIStringRegistration\r\n");
   return 0;
@@ -228,7 +228,7 @@ int test_CGI_registration(void)
     return -1;
   }
 #ifdef tesst_printPathFunctionTable
-    http_CGI_printPathFunctionTable();
+  http_CGI_printPathFunctionTable();
 #endif
 
   http_CGI_pathFunction_t *cgiPathHandle2;
@@ -239,7 +239,7 @@ int test_CGI_registration(void)
     return -1;
   }
 #ifdef tesst_printPathFunctionTable
-    http_CGI_printPathFunctionTable();
+  http_CGI_printPathFunctionTable();
 #endif
 
   http_CGI_pathFunction_t *cgiPathHandle3;
@@ -250,12 +250,12 @@ int test_CGI_registration(void)
     return -1;
   }
 #ifdef tesst_printPathFunctionTable
-    http_CGI_printPathFunctionTable();
+  http_CGI_printPathFunctionTable();
 #endif
 
   http_CGI_deRegister_pathFunction(cgiPathHandle2);
 #ifdef tesst_printPathFunctionTable
-    http_CGI_printPathFunctionTable();
+  http_CGI_printPathFunctionTable();
 #endif
 
   //multiple registrations of the same CB
@@ -266,7 +266,7 @@ int test_CGI_registration(void)
     return -1;
   }
 #ifdef tesst_printPathFunctionTable
-    http_CGI_printPathFunctionTable();
+  http_CGI_printPathFunctionTable();
 #endif
 
   printf(PASS "test_CGI\r\n");
@@ -651,13 +651,13 @@ int test_response_header(void)
 
 //copy of index contents in new file for test
 static unsigned char index1_html[] = {
-      0x3c, 0x68, 0x74, 0x6d, 0x6c, 0x3e, 0x0a, 0x20, 0x20, 0x3c, 0x62, 0x6f,
-      0x64, 0x79, 0x3e, 0x0a, 0x20, 0x20, 0x20, 0x20, 0x3c, 0x48, 0x31, 0x3e,
-      0x48, 0x45, 0x4c, 0x4c, 0x4f, 0x20, 0x57, 0x4f, 0x52, 0x4c, 0x44, 0x3c,
-      0x2f, 0x48, 0x31, 0x3e, 0x0a, 0x20, 0x20, 0x3c, 0x2f, 0x62, 0x6f, 0x64,
-      0x79, 0x3e, 0x0a, 0x3c, 0x2f, 0x68, 0x74, 0x6d, 0x6c, 0x3e, 0x0a, 0};
+    0x3c, 0x68, 0x74, 0x6d, 0x6c, 0x3e, 0x0a, 0x20, 0x20, 0x3c, 0x62, 0x6f,
+    0x64, 0x79, 0x3e, 0x0a, 0x20, 0x20, 0x20, 0x20, 0x3c, 0x48, 0x31, 0x3e,
+    0x48, 0x45, 0x4c, 0x4c, 0x4f, 0x20, 0x57, 0x4f, 0x52, 0x4c, 0x44, 0x3c,
+    0x2f, 0x48, 0x31, 0x3e, 0x0a, 0x20, 0x20, 0x3c, 0x2f, 0x62, 0x6f, 0x64,
+    0x79, 0x3e, 0x0a, 0x3c, 0x2f, 0x68, 0x74, 0x6d, 0x6c, 0x3e, 0x0a, 0};
 static unsigned int index1_html_len = 60;
-static char* path_index1_html="/index1.html";
+static char *path_index1_html = "/index1.html";
 
 int test_file_local_filesystem(void)
 {
@@ -665,8 +665,9 @@ int test_file_local_filesystem(void)
   http_file_filesystem_fp_t fp;
 
   //register default index file into the local file system.
-  int retval=http_localfs_registerFile(path_index1_html, (char *)&index1_html, index1_html_len, 0);
-  if(retval<0){
+  int retval = http_localfs_registerFile(path_index1_html, (char *)&index1_html, index1_html_len, 0);
+  if (retval < 0)
+  {
     printf(FAIL "test_file_local_filesystem(registerFile failed)\r\n");
   }
   printf(PASS "test_file_local_filesystem(rgister File)\r\n");
@@ -678,7 +679,7 @@ int test_file_local_filesystem(void)
     return -1;
   }
   printf(PASS "test_file_local_filesystem(fopen index)\r\n");
-  
+
   //test content length using feof
   unsigned int i = 1;
   while (-1 != http_localfs_feof(fp))
@@ -706,6 +707,7 @@ int test_file_local_filesystem(void)
   if (0 != strncmp((const char *)index1_html, (const char *)fileContents, index1_html_len - 1))
   {
     printf(FAIL "test_file_local_filesystem(content comparison)\r\n");
+    return -1;
   }
   printf(PASS "test_file_local_filesystem(getc- content comparison)\r\n");
 
@@ -714,39 +716,82 @@ int test_file_local_filesystem(void)
   //fread test
   fp = http_localfs_fopen(path_index1_html);
   char fileReadBuffer[500];
-  int readLength= http_localfs_fread((void *)&fileReadBuffer, 55, 1 , fp);
-  if(55!=readLength){
+  int readLength = http_localfs_fread((void *)&fileReadBuffer, 55, 1, fp);
+  if (55 != readLength)
+  {
     printf(FAIL "test_file_local_filesystem(read- length missmatch)\r\n");
+    return -1;
   }
   printf(PASS "test_file_local_filesystem(read- lengthmissmatch)\r\n");
   if (0 != strncmp((const char *)index1_html, (const char *)fileReadBuffer, 55))
   {
     printf(FAIL "test_file_local_filesystem(read content comparison)\r\n");
+    return -1;
   }
   printf(PASS "test_file_local_filesystem(read- content comparison)\r\n");
 
   //ty rto read more contents than remaining
-  readLength= http_localfs_fread((void *)&fileReadBuffer, 100, 1 , fp);
-  if ((unsigned int)readLength!=index1_html_len-56){
+  readLength = http_localfs_fread((void *)&fileReadBuffer, 100, 1, fp);
+  if ((unsigned int)readLength != index1_html_len - 56)
+  {
     printf(FAIL "test_file_local_filesystem(remaining read content length)\r\n");
+    return -1;
   }
   printf(PASS "test_file_local_filesystem(read - remaining content length)\r\n");
   //test remaining read contents
-  if (0 != strncmp((const char *)&index1_html[55], (const char *)fileReadBuffer,readLength))
+  if (0 != strncmp((const char *)&index1_html[55], (const char *)fileReadBuffer, readLength))
   {
     printf(FAIL "test_file_local_filesystem(remaining read content comparison)\r\n");
+    return -1;
   }
   printf(PASS "test_file_local_filesystem(read - remaining content comparison)\r\n");
 
   //try to read contents when it is already at EOF
-  readLength= http_localfs_fread((void *)&fileReadBuffer, 100, 1 , fp);
+  readLength = http_localfs_fread((void *)&fileReadBuffer, 100, 1, fp);
   if (-1 != readLength)
   {
     printf(FAIL "test_file_local_filesystem(over read test failure)\r\n");
+    return -1;
   }
   printf(PASS "test_file_local_filesystem(read - over read test)\r\n");
-  
-  
+  http_localfs_fclose(fp);
+
+  fp = http_localfs_fopen(path_index1_html);
+  int retVal = http_localfs_fseek(fp, 10, SEEK_SET);
+  if ((0 != retVal) || (10 != fp->filePosition))
+  {
+    printf(FAIL "test_file_local_filesystem(fseek SEEK_SET)\r\n");
+    return -1;
+  }
+  printf(PASS "test_file_local_filesystem(fseek offset SEEK_SET)\r\n");
+
+  //test long seek set
+  retVal = http_localfs_fseek(fp, 100, SEEK_SET);
+  if ((0 != retVal) || ((index1_html_len - 1) != fp->filePosition))
+  {
+    printf(FAIL "test_file_local_filesystem(fseek long SEEK_SET)\r\n");
+    return -1;
+  }
+  printf(PASS "test_file_local_filesystem(fseek long SEEK_SET)\r\n");
+
+  //test seek end
+  retVal = http_localfs_fseek(fp, -57, SEEK_END);
+  if ((0 != retVal) || (2 != fp->filePosition))
+  {
+    printf(FAIL "test_file_local_filesystem(fseek SEEK_END)\r\n");
+    return -1;
+  }
+  printf(PASS "test_file_local_filesystem(fseek SEEK_END)\r\n");
+
+  //test seek end
+  retVal = http_localfs_fseek(fp, -57, SEEK_END);
+  if ((0 != retVal) || (0 != fp->filePosition))
+  {
+    printf(FAIL "test_file_local_filesystem(fseek long SEEK_END)\r\n");
+    return -1;
+  }
+  printf(PASS "test_file_local_filesystem(fseek long SEEK_END)\r\n");
+
   //test to open nonexistant file
   fp = http_localfs_fopen("/jibberish");
   if (NULL != fp)
