@@ -28,7 +28,7 @@ int http_server(int socket, http_net_netops_t *netops)
     switch (http_request.method)
     {
     case GET:
-        switch (http_request.fileType)
+        switch (http_request.fileClass)
         {
         case httpFileType_none:
             break;

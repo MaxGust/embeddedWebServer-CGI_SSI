@@ -46,7 +46,7 @@ static httpRequest_method_t parseRequest_mapMethodToEnum(char *method)
 }
 
 //identify whether the requested file is CGI/SSI or just for regular contents.
-static httpFileType_code_t parseRequest_identifyFileClass(char *path)
+static httpRequest_file_class_t parseRequest_identifyFileClass(char *path)
 {
     char *fileType = strrchr(path, '.'); //can hit some real corner case where there is no extension and thre is a . in path
     if (0 == fileType)
@@ -114,7 +114,7 @@ int parseRquest_identifyRequest(unsigned char *requestBuffer, http_request_t *ht
     strncpy(httpRequest->httpFilePath, decodedURL, HTTP_MAX_PATH_LENGTH);
 
     //decode file type and add copy it for returning
-    httpRequest->fileType = parseRequest_identifyFileClass(path);
+    httpRequest->fileClass = parseRequest_identifyFileClass(path);
 
     //return success
     return HTTP_SUCCESS;
