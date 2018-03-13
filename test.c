@@ -10,6 +10,7 @@
 #include "http_local_filesystem.h"
 #include "http_file.h"
 #include "http_net.h"
+#include "http_server.h"
 
 #define PASS "\x1B[1;32mPASS:\x1B[0m\t"
 #define FAIL "\x1B[1;31mFAIL:\x1B[0m\t"
@@ -977,14 +978,89 @@ int test_http_net(void)
   return 0;
 }
 
-//http_server_test
-int test_http_server(void){
-  //deinit and init the FS
-  //register files
-  //register fops
-  //register dummy netops
-  //socket1 test - non-existant file
+int http_server_dummy_read(int socket, unsigned char *readBuffer, int readBufferLength, int timeoutMs);
+int http_server_dummy_write(int socket, unsigned char *readBuffer, int readBufferLength, int timeoutMs);
+void http_server_dummy_disconnect(int socket);
 
+int http_server_dummy_read(int socket, unsigned char *readBuffer, int readBufferLength, int timeoutMs)
+{
+  unsigned char sock1RequestBuffer[] = "GET /ta.gs/ref_htt%20%20pmethods.html\r\ncache-control: no-cache\r\naccept-encoding: gzip, deflate\r\n\r\n";
+  if ((0 > socket) || (NULL == readBuffer) || (0 == readBufferLength) || (0 > timeoutMs))
+  {
+    return -1;
+  }
+  if (1 == socket)
+  { //for test 1
+    memcpy((void *)readBuffer, (void *)&sock1RequestBuffer, sizeof(sock1RequestBuffer));
+    return (int)sizeof(sock1RequestBuffer);
+  }
+  
+  return -1;
+}
+int http_server_dummy_write(int socket, unsigned char *writeBuffer, int writeBufferLength, int timeoutMs)
+{
+  char *sock1RetString="HTTP/1.1 404 Not Found\r\n\r\n";
+  if ((0 > socket) || (NULL == writeBuffer) || (0 == writeBufferLength) || (0 > timeoutMs))
+  {
+    return -1;
+  }
+  if(1==socket){
+    if(0!=strncmp((char*)writeBuffer,sock1RetString,writeBufferLength)){
+      printf(FAIL"test_http_server (404 filenot found)\r\n");
+      return -1;
+    }
+    printf(PASS"test_http_server (404 filenot found)\r\n");
+  }
+  else if(2==socket){
+
+  }
+//  printf("socket write stub (sock: %d, len: %d)\r\n",socket,writeBufferLength);
+//  printf("%.*s",writeBufferLength,writeBuffer);
+
+  return 0;
+}
+void http_server_dummy_disconnect(int socket)
+{
+  if(socket<=0){
+    printf(FAIL"Disconnecting socket (%d)\r\n",socket);
+  }
+}
+
+//http_server_test
+int test_http_server(void)
+{
+  //deinit and init the FS
+  http_file_fops_t localFSFops;
+  http_localfs_deinit(); //just in case previous test left it in stale state
+  http_localfs_init();
+  //register default index file into the local file system.
+  int retval = http_localfs_registerFile(path_index1_html, (char *)&index1_html, index1_html_len, 0);
+  if (retval < 0)
+  {
+    printf(FAIL "test_http_server(registerFile failed)\r\n");
+  }
+
+  //register fops. reusing fops wrapers from fs test
+  http_file_init_fopsStruct(&localFSFops);
+  localFSFops.fopen = http_localfs_fopen_w;
+  localFSFops.fclose = http_localfs_fclose_w;
+  localFSFops.fread = http_localfs_fread_w;
+  localFSFops.fgetc = http_localfs_fgetc_w;
+  localFSFops.fseek = http_localfs_fseek_w;
+  localFSFops.feof = http_localfs_feof_w;
+  http_file_register_fops(localFSFops);
+  //register stub netops
+  http_net_netops_t http_net_test_netops;
+  http_net_init_netopsStruct(&http_net_test_netops);
+
+  int socket = 1;
+  http_net_test_netops.http_net_read = http_server_dummy_read;
+  http_net_test_netops.http_net_write = http_server_dummy_write;
+  http_net_test_netops.http_net_disconnect = http_server_dummy_disconnect;
+  http_net_netops_t *httpNetops = http_net_register_netops(http_net_test_netops);
+
+  //socket1 test - non-existant file
+  retval=http_server(socket,httpNetops);
   printf(PASS ">>test_http_server<<\r\n");
   return 0;
 }
