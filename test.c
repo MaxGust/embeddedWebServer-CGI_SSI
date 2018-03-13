@@ -8,6 +8,7 @@
 #include "http_cgi.h"
 #include "http_response.h"
 #include "http_local_filesystem.h"
+#include "http_file.h"
 
 #define PASS "\x1B[1;32mPASS:\x1B[0m\t"
 #define FAIL "\x1B[1;31mFAIL:\x1B[0m\t"
@@ -27,6 +28,7 @@ int test_response_fileType(void);
 int test_response_contentType(void);
 int test_response_header(void);
 int test_file_local_filesystem(void);
+int test_http_file(void);
 
 int test_methodFileType(void)
 {
@@ -816,7 +818,80 @@ int test_file_local_filesystem(void)
   }
   printf(PASS "test_file_local_filesystem(fclose - jibberish)\r\n");
 
-  printf(PASS "test_file_local_filesystem\r\n");
+  //deinit the filesystem
+  if (HTTP_SUCCESS != http_localfs_deinit())
+  {
+    printf(FAIL "test_file_local_filesystem(fs deinit)\r\n");
+    return -1;
+  }
+  printf(PASS "test_file_local_filesystem(fs deinit)\r\n");
+
+  printf(PASS ">>test_file_local_filesystem<<\r\n");
+  return 0;
+}
+
+/*wrapper functions for type sanity. 
+if this is not done casting fp to void will cause compiler warnings
+*/
+void *http_localfs_fopen_w(const char *filename);
+int http_localfs_fclose_w(void *fp);
+size_t http_localfs_fread_w(void *ptr, size_t size, size_t nmemb, void *fp);
+int http_localfs_fgetc_w(void *fp);
+int http_localfs_fseek_w(void *fp, long offset, int whence);
+int http_localfs_feof_w(void *fp);
+
+void *http_localfs_fopen_w(const char *filename) { return (void *)http_localfs_fopen(filename); }
+int http_localfs_fclose_w(void *fp) { return http_localfs_fclose((http_localfs_filesystem_fp_t)fp); }
+size_t http_localfs_fread_w(void *ptr, size_t size, size_t nmemb, void *fp) { return http_localfs_fread(ptr, size, nmemb, (http_localfs_filesystem_fp_t)fp); }
+int http_localfs_fgetc_w(void *fp) { return http_localfs_fgetc((http_localfs_filesystem_fp_t)fp); }
+int http_localfs_fseek_w(void *fp, long offset, int whence) { return http_localfs_fseek((http_localfs_filesystem_fp_t)fp, offset, whence); }
+int http_localfs_feof_w(void *fp) { return http_localfs_feof((http_localfs_filesystem_fp_t)fp); }
+
+int test_http_file(void)
+{
+  http_file_fops_t localFSFops;
+  //init all to null
+
+  http_localfs_deinit(); //just in case previous test left it in stale state
+  http_localfs_init();
+
+  //register default index file into the local file system.
+  int retval = http_localfs_registerFile(path_index1_html, (char *)&index1_html, index1_html_len, 0);
+  if (retval < 0)
+  {
+    printf(FAIL "test_http_file(registerFile failed)\r\n");
+  }
+  printf(PASS "test_http_file(rgister File)\r\n");
+
+  http_file_init_fopsStruct(&localFSFops);
+  printf(PASS "test_http_file(init fops struct fops)\r\n");
+  localFSFops.fopen = http_localfs_fopen_w;
+  localFSFops.fclose = http_localfs_fclose_w;
+  localFSFops.fread = http_localfs_fread_w;
+  localFSFops.fgetc = http_localfs_fgetc_w;
+  localFSFops.fseek = http_localfs_fseek_w;
+  localFSFops.feof = http_localfs_feof_w;
+
+  http_file_register_fops(localFSFops);
+  printf(PASS "test_http_file(register fops)\r\n");
+
+  //now try calling the fops via the master http_file_fops
+  void *fp = http_file_fops.fopen(path_index1_html);
+  if (NULL == fp)
+  {
+    printf(FAIL "test_http_file(fopen index)\r\n");
+    return -1;
+  }
+  printf(PASS "test_http_file(fopen index)\r\n");
+
+  if (0 != http_file_fops.fclose(fp))
+  {
+    printf(FAIL "test_http_file(fclose index)\r\n");
+    return -1;
+  }
+  printf(PASS "test_http_file(fclose index)\r\n");
+
+  printf(PASS ">>test_http_file<<\r\n");
   return 0;
 }
 
@@ -842,6 +917,8 @@ int main(void)
     retval = -7;
   if (0 != test_file_local_filesystem())
     retval = -8;
+  if (0 != test_http_file())
+    retval = -9;
   if (0 == retval)
   {
     printf(PASS "****************ALL TESTS PASSED****************\r\n\r\n");

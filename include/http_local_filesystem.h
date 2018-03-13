@@ -68,4 +68,6 @@ void http_localfs_rewind(http_localfs_filesystem_fp_t fp);
 
 //generic fseek
 int http_localfs_fseek(http_localfs_filesystem_fp_t fp, long offset, int whence);
+
+
 #endif

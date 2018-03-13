@@ -9,7 +9,7 @@ http_file_fops_t http_file_fops;
 /*init a plain fops structure*/
 void http_file_init_fopsStruct(http_file_fops_t *fops)
 {
-    memset(&fops, 0, sizeof(http_file_fops_t));
+    memset(fops, 0, sizeof(http_file_fops_t));
 }
 /*function to register fops to http server*/
 int http_file_register_fops(http_file_fops_t fops)

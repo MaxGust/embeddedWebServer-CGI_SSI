@@ -1,6 +1,7 @@
 #ifndef __HTTP_FILE_H__
 #define __HTTP_FILE_H__
 #include <stdio.h>
+
 /*
 Uses standard terminology and signature as standard c file operations
 expects same behaviour as standard C file operations
@@ -19,13 +20,16 @@ typedef size_t (*http_file_fread_t)(void *ptr, size_t size, size_t nmemb, void *
 
 typedef struct
 {
-    http_file_fopen_t http_file_fopen;
-    http_file_fclose_t http_file_fclose;
-    http_file_fread_t http_file_fread;
-    http_file_fgetc_t http_file_fgetc;
-    http_file_fseek_t http_file_fseek;
-    http_file_feof_t http_file_feof;
+    http_file_fopen_t fopen;
+    http_file_fclose_t fclose;
+    http_file_fread_t fread;
+    http_file_fgetc_t fgetc;
+    http_file_fseek_t fseek;
+    http_file_feof_t feof;
 } http_file_fops_t; //type to register underlying file system fops to the HTTP server.
+
+//global variable used to access fops by http server
+extern http_file_fops_t http_file_fops;
 
 //deregister all fops and make the structure NULL
 void http_file_deregister_fops(void);

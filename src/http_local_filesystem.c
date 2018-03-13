@@ -25,7 +25,7 @@ static char *path_index_html = "/index.html";
 #endif
 
 /*initialize filesystem . increase array size and populate details below to add it to FS
-  this is like mounting the fs
+  this is like mounting the fs. to be called only once. To call again, close all open files, deinit and then init.
 */
 int http_localfs_init(void)
 {
@@ -94,6 +94,7 @@ int http_localfs_deinit(void)
 {
     //but how to track and handle all fps that where malloced without much overhead?
     memset(&http_local_filesystem, 0, HTTP_LOCAL_FILESYSTEM_NUMFILES * sizeof(http_localfs_filesystem_file_t));
+    fileIndex=0;
     return HTTP_SUCCESS;
 }
 
