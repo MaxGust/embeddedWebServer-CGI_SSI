@@ -10,11 +10,16 @@
 /*this connection is a per-connection server
     precondition: 
         - netops and fops should have been registered
+        - file system should be mounted and files should be registered
 */
 
 int http_server(int socket, http_net_netops_t *netops)
 {
     unsigned char http_buffer[HTTP_SERVER_BUFFER_SIZE];
+    if(NULL==netops->http_net_read){
+        PRINT_ERROR("netops read not initialized(%d)\r\n",(int)netops);
+        return -1;
+    }
     int byteCount = netops->http_net_read(socket, (unsigned char *)&http_buffer, HTTP_SERVER_BUFFER_SIZE, HTTP_SERVER_TIMOUT_MS);
     if (byteCount <= 0)
     {
@@ -30,7 +35,8 @@ int http_server(int socket, http_net_netops_t *netops)
     case GET:
         switch (http_request.fileClass)
         {
-        case httpFileType_none:
+        case httpFileType_none:     //regular File processing flow
+
             break;
         case httpFileType_SSI:
             break;
