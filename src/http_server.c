@@ -19,7 +19,7 @@ int http_server(int socket, http_net_netops_t *netops)
     char httpWriteBuffer[HTTP_SERVER_WRITE_BUFFER_SIZE];
     if ((NULL == netops->http_net_read) || (NULL == netops->http_net_write))
     {
-        PRINT_ERROR("netops read not initialized(%d)\r\n", (int)netops);
+        PRINT_ERROR("netops read not initialized(%s)\r\n", "nullNetops");
         return -1;
     }
     int byteCount = netops->http_net_read(socket, (unsigned char *)&httpReadBuffer, HTTP_SERVER_READ_BUFFER_SIZE, HTTP_SERVER_TIMOUT_MS);
