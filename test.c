@@ -748,14 +748,14 @@ int test_file_local_filesystem(void)
   //fread test
   fp = http_localfs_fopen(path_index1_html);
   char fileReadBuffer[500];
-  int readLength = http_localfs_fread((void *)&fileReadBuffer, 55, 1, fp);
+  int readLength = http_localfs_fread((void *)&fileReadBuffer, 54, 1, fp);
   if (55 != readLength)
   {
     printf(FAIL "test_file_local_filesystem(read- length missmatch)\r\n");
     return -1;
   }
   printf(PASS "test_file_local_filesystem(read- lengthmissmatch)\r\n");
-  if (0 != strncmp((const char *)index1_html, (const char *)fileReadBuffer, 55))
+  if (0 != strncmp((const char *)index1_html, (const char *)fileReadBuffer, 54))
   {
     printf(FAIL "test_file_local_filesystem(read content comparison)\r\n");
     return -1;
@@ -764,14 +764,14 @@ int test_file_local_filesystem(void)
 
   //ty rto read more contents than remaining
   readLength = http_localfs_fread((void *)&fileReadBuffer, 100, 1, fp);
-  if ((unsigned int)readLength != index1_html_len - 56)
+  if ((unsigned int)readLength != index1_html_len - 55)
   {
     printf(FAIL "test_file_local_filesystem(remaining read content length)\r\n");
     return -1;
   }
   printf(PASS "test_file_local_filesystem(read - remaining content length)\r\n");
   //test remaining read contents
-  if (0 != strncmp((const char *)&index1_html[55], (const char *)fileReadBuffer, readLength))
+  if (0 != strncmp((const char *)&index1_html[54], (const char *)fileReadBuffer, readLength))
   {
     printf(FAIL "test_file_local_filesystem(remaining read content comparison)\r\n");
     return -1;
@@ -985,44 +985,87 @@ void http_server_dummy_disconnect(int socket);
 int http_server_dummy_read(int socket, unsigned char *readBuffer, int readBufferLength, int timeoutMs)
 {
   unsigned char sock1RequestBuffer[] = "GET /ta.gs/ref_htt%20%20pmethods.html\r\ncache-control: no-cache\r\naccept-encoding: gzip, deflate\r\n\r\n";
+  unsigned char sock2RequestBuffer[] = "GET /index1.html\r\ncache-control: no-cache\r\naccept-encoding: gzip, deflate\r\n\r\n";
   if ((0 > socket) || (NULL == readBuffer) || (0 == readBufferLength) || (0 > timeoutMs))
   {
     return -1;
   }
-  if (1 == socket)
-  { //for test 1
+  switch (socket)
+  {
+  case 1: //non-existetn file
     memcpy((void *)readBuffer, (void *)&sock1RequestBuffer, sizeof(sock1RequestBuffer));
     return (int)sizeof(sock1RequestBuffer);
+    break;
+  case 2: //index.html
+    memcpy((void *)readBuffer, (void *)&sock2RequestBuffer, sizeof(sock1RequestBuffer));
+    return (int)sizeof(sock1RequestBuffer);
+    break;
+  default:
+    return -1;
+    break;
   }
-  
+
   return -1;
 }
 int http_server_dummy_write(int socket, unsigned char *writeBuffer, int writeBufferLength, int timeoutMs)
 {
-  char *sock1RetString="HTTP/1.1 404 Not Found\r\n\r\n";
+  char *sock1RetString = "HTTP/1.1 404 Not Found\r\n\r\n";
+  char *sock2RetHeader = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 59\r\n\r\n";
+static int headerBody = 0;
+size_t compLen;
   if ((0 > socket) || (NULL == writeBuffer) || (0 == writeBufferLength) || (0 > timeoutMs))
   {
     return -1;
   }
-  if(1==socket){
-    if(0!=strncmp((char*)writeBuffer,sock1RetString,writeBufferLength)){
-      printf(FAIL"test_http_server (404 filenot found)\r\n");
+  switch (socket)
+  {
+  case 1:
+    compLen=sizeof(sock1RetString);
+    if (0 != strncmp((char *)writeBuffer, sock1RetString, compLen))
+    {
+      printf(FAIL "test_http_server (404 filenot found)\r\n");
       return -1;
     }
-    printf(PASS"test_http_server (404 filenot found)\r\n");
+    printf(PASS "test_http_server (404 filenot found)\r\n");
+    break;
+  case 2:
+    if (0 == headerBody)
+    { //expecting header to be written
+      compLen=sizeof(sock2RetHeader);
+      if (0 != strncmp( sock2RetHeader,(char *)writeBuffer, compLen))
+      {
+        printf(FAIL "test_http_server (200 OK header test)\r\n");
+        return -1;
+      }
+      printf(PASS "test_http_server (200 OK header test)\r\n");
+      headerBody += 1; //next expect body
+      return 0;
+    }
+    else if (1 == headerBody)
+    {
+      if (0 != strncmp((char*)writeBuffer, (char*)index1_html, index1_html_len))
+      {
+        printf(FAIL "test_http_server (200 OK body test)\r\n");
+        return -1;
+      }
+      printf(PASS "test_http_server (200 OK body test(%d,%d))\r\n",index1_html_len,writeBufferLength);
+      return 0;
+    }
+    break;
+  default:
+    return -1;
+    break;
   }
-  else if(2==socket){
+  //  printf("socket write stub (sock: %d, len: %d)\r\n",socket,writeBufferLength);
+  //  printf("%.*s",writeBufferLength,writeBuffer);
 
-  }
-//  printf("socket write stub (sock: %d, len: %d)\r\n",socket,writeBufferLength);
-//  printf("%.*s",writeBufferLength,writeBuffer);
-
-  return 0;
+  return -1;
 }
 void http_server_dummy_disconnect(int socket)
 {
-  if(socket<=0){
-    printf(FAIL"Disconnecting socket (%d)\r\n",socket);
+  if (socket <= 0)
+  {
+    printf(FAIL "Disconnecting socket (%d)\r\n", socket);
   }
 }
 
@@ -1053,14 +1096,20 @@ int test_http_server(void)
   http_net_netops_t http_net_test_netops;
   http_net_init_netopsStruct(&http_net_test_netops);
 
-  int socket = 1;
   http_net_test_netops.http_net_read = http_server_dummy_read;
   http_net_test_netops.http_net_write = http_server_dummy_write;
   http_net_test_netops.http_net_disconnect = http_server_dummy_disconnect;
   http_net_netops_t *httpNetops = http_net_register_netops(http_net_test_netops);
 
   //socket1 test - non-existant file
-  retval=http_server(socket,httpNetops);
+  if (0 > http_server(1, httpNetops))
+  {
+    return -1;
+  }
+  if (0>http_server(2, httpNetops))
+  {
+    return -1;
+  }
   printf(PASS ">>test_http_server<<\r\n");
   return 0;
 }

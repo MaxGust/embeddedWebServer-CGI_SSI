@@ -65,12 +65,31 @@ int http_server(int socket, http_net_netops_t *netops)
                     PRINT_ERROR("error forming 404 header (%d)\r\n", httpFileType_none);
                     return -1;
                 }
-                netops->http_net_write(socket, (unsigned char*)httpWriteBuffer, retBufLen, HTTP_SERVER_TIMOUT_MS);
+                netops->http_net_write(socket, (unsigned char *)httpWriteBuffer, retBufLen, HTTP_SERVER_TIMOUT_MS);
                 netops->http_net_disconnect(socket);
                 return 0;
             }
             else
             { //file found . do read, determine if chunking is required, write accordingly and disconnect
+                char freadBuffer[HTTP_SERVER_FREAD_BUFFER_SIZE];
+                int readLen = http_file_fops.fread(&freadBuffer, sizeof(freadBuffer), 1, fp);
+                if (http_file_fops.feof(fp))
+                {                                                            //complete contents has been read to buffer. no chunking required
+                    httpResponse.responseCode = HTTP_RESCODE_successSuccess; //200 OK
+                    httpResponse.bodyLength = readLen;
+                    httpResponse.filePath = http_request.httpFilePath;
+                    retBufLen = http_response_response_header(httpResponse);
+                    //check retval write and disconnect
+                    if (retBufLen <= 0)
+                    {
+                        PRINT_ERROR("error forming 404 header (%d)\r\n", httpFileType_none);
+                        return -1;
+                    }
+                    netops->http_net_write(socket, (unsigned char *)httpWriteBuffer, retBufLen, HTTP_SERVER_TIMOUT_MS);
+                    netops->http_net_write(socket, (unsigned char *)freadBuffer, readLen, HTTP_SERVER_TIMOUT_MS);
+                    netops->http_net_disconnect(socket);
+                    return 0;
+                }
             }
             break;
         case httpFileType_SSI:
