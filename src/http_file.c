@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-/*currently supporting only one file system at a time*/
+/*currently supporting only one file system at a time - should this go into http_server.c?*/
 http_file_fops_t http_file_fops;
 
 /*init a plain fops structure*/
