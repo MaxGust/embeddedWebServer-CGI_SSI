@@ -6,7 +6,7 @@
 #include "http_common.h"
 #include "http_config.h"
 
-static http_file_filesystem_file_t http_local_filesystem[HTTP_LOCAL_FILESYSTEM_NUMFILES];
+static http_localfs_filesystem_file_t http_local_filesystem[HTTP_LOCAL_FILESYSTEM_NUMFILES];
 static unsigned int fileIndex = 0;
 
 //arrays created using xxd tool.
@@ -30,7 +30,7 @@ static char *path_index_html = "/index.html";
 int http_localfs_init(void)
 {
     //init filesystem table to 0. Not necessary since it is a global array. implemented for future scalability
-    memset(&http_local_filesystem, 0, HTTP_LOCAL_FILESYSTEM_NUMFILES * sizeof(http_file_filesystem_file_t));
+    memset(&http_local_filesystem, 0, HTTP_LOCAL_FILESYSTEM_NUMFILES * sizeof(http_localfs_filesystem_file_t));
 #ifdef HTTP_LOCALFS_INDEX
     //register default index file into the local file system.
     http_localfs_registerFile(path_index_html, (char *)&index_html, index_html_len, 0);
@@ -60,15 +60,15 @@ int http_localfs_registerFile(const char *filePath, char *file, unsigned int fil
 }
 
 //returns a file pointer
-http_file_filesystem_fp_t http_localfs_fopen(const char *fileName)
+http_localfs_filesystem_fp_t http_localfs_fopen(const char *fileName)
 {
     unsigned int i;
     for (i = 0; i < fileIndex; i++)
     {
         if (0 == strcmp(http_local_filesystem[i].filePath, fileName))
         {
-            http_file_filesystem_fp_t fp;
-            fp = (http_file_filesystem_fp_t)malloc(sizeof(http_file_filesystem_fpRoot_t));
+            http_localfs_filesystem_fp_t fp;
+            fp = (http_localfs_filesystem_fp_t)malloc(sizeof(http_localfs_filesystem_fpRoot_t));
             fp->fileNumber = i; //this can very well be pointer to that array address. but fileno is a standard convention
             fp->filePosition = 0;
             return fp;
@@ -78,7 +78,7 @@ http_file_filesystem_fp_t http_localfs_fopen(const char *fileName)
 }
 
 //function to close a file pointer after fops are done.
-int http_localfs_fclose(http_file_filesystem_fp_t fp) //free the fp
+int http_localfs_fclose(http_localfs_filesystem_fp_t fp) //free the fp
 {
     if (NULL == fp)
     {
@@ -93,14 +93,14 @@ int http_localfs_fclose(http_file_filesystem_fp_t fp) //free the fp
 int http_localfs_deinit(void)
 {
     //but how to track and handle all fps that where malloced without much overhead?
-    memset(&http_local_filesystem, 0, HTTP_LOCAL_FILESYSTEM_NUMFILES * sizeof(http_file_filesystem_file_t));
+    memset(&http_local_filesystem, 0, HTTP_LOCAL_FILESYSTEM_NUMFILES * sizeof(http_localfs_filesystem_file_t));
     return HTTP_SUCCESS;
 }
 
 /*regular fgetc implementation for the local file system. 
  reads the next character from stream and returns it as an unsigned char cast to an int, or EOF (-1) on end of file or error.
 */
-int http_localfs_fgetc(http_file_filesystem_fp_t fp)
+int http_localfs_fgetc(http_localfs_filesystem_fp_t fp)
 {
     //input checking
     if (NULL == fp)
@@ -121,7 +121,7 @@ int http_localfs_fgetc(http_file_filesystem_fp_t fp)
 }
 
 //generic feof function. returns -1 if EOF
-int http_localfs_feof(http_file_filesystem_fp_t fp)
+int http_localfs_feof(http_localfs_filesystem_fp_t fp)
 {
     //end of file
     if (fp->filePosition == (http_local_filesystem[fp->fileNumber].fileLength - 1))
@@ -131,7 +131,7 @@ int http_localfs_feof(http_file_filesystem_fp_t fp)
     return 0;
 }
 
-size_t http_localfs_fread(void *ptr, size_t size, size_t nmemb, http_file_filesystem_fp_t fp)
+size_t http_localfs_fread(void *ptr, size_t size, size_t nmemb, http_localfs_filesystem_fp_t fp)
 {
     if (NULL == ptr)
     {
@@ -166,26 +166,26 @@ size_t http_localfs_fread(void *ptr, size_t size, size_t nmemb, http_file_filesy
 }
 
 //generic fileno function
-int http_localfs_fileno(http_file_filesystem_fp_t fp)
+int http_localfs_fileno(http_localfs_filesystem_fp_t fp)
 {
     return fp->fileNumber;
 }
 
 //generic ftell function
-long http_localfs_ftell(http_file_filesystem_fp_t fp)
+long http_localfs_ftell(http_localfs_filesystem_fp_t fp)
 {
     return (long)fp->filePosition;
 }
 
 //generic rewind function
-void http_localfs_rewind(http_file_filesystem_fp_t fp)
+void http_localfs_rewind(http_localfs_filesystem_fp_t fp)
 {
     fp->filePosition = 0;
 }
 
 //Generic fseek function
 // TODO: reusing  SEEK_SET, SEEK_CUR, and SEEK_END from stdio. need to see if this will work on embedded platforms
-int http_localfs_fseek(http_file_filesystem_fp_t fp, long offset, int whence)
+int http_localfs_fseek(http_localfs_filesystem_fp_t fp, long offset, int whence)
 {
     if (NULL == fp)
     {

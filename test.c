@@ -104,10 +104,10 @@ int test_SSIStringRegistration(void)
   SSIReplacementHandle1 = http_SSI_register_replacer(testSSIString1, timerVal_SSI_replacer_cb);
   if (NULL == SSIReplacementHandle1)
   {
-    printf(FAIL "test_SSIStringRegistration(http_SSI_register_replacer 1)");
+    printf(FAIL "test_SSIStringRegistration(http_SSI_register_replacer 1)\r\n");
     return -1;
   }
-  printf(PASS "test_SSIStringRegistration(http_SSI_register_replacer 1)");
+  printf(PASS "test_SSIStringRegistration(http_SSI_register_replacer 1)\r\n");
 
 #ifdef test_debugTablePrint
   http_SSI_printReplacerTable();
@@ -117,10 +117,10 @@ int test_SSIStringRegistration(void)
   SSIReplacementHandle2 = http_SSI_register_replacer(testSSIString2, sysStatus_SSI_replacer_cb);
   if (NULL == SSIReplacementHandle2)
   {
-    printf(FAIL "test_SSIStringRegistration(2)");
+    printf(FAIL "test_SSIStringRegistration(2)\r\n");
     return -1;
   }
-  printf(PASS "test_SSIStringRegistration(http_SSI_register_replacer 2)");
+  printf(PASS "test_SSIStringRegistration(http_SSI_register_replacer 2)\r\n");
 #ifdef test_debugTablePrint
   http_SSI_printReplacerTable();
 #endif
@@ -129,10 +129,10 @@ int test_SSIStringRegistration(void)
   SSIReplacementHandle3 = http_SSI_register_replacer(testSSIString3, resetStatus_SSI_replacer_cb);
   if (NULL == SSIReplacementHandle3)
   {
-    printf(FAIL "test_SSIStringRegistration(3)");
+    printf(FAIL "test_SSIStringRegistration(3)\r\n");
     return -1;
   }
-  printf(PASS "test_SSIStringRegistration(http_SSI_register_replacer 3)");
+  printf(PASS "test_SSIStringRegistration(http_SSI_register_replacer 3)\r\n");
 
 #ifdef test_debugTablePrint
   http_SSI_printReplacerTable();
@@ -147,10 +147,10 @@ int test_SSIStringRegistration(void)
   SSIReplacementHandle2 = http_SSI_register_replacer(testSSIString3, resetStatus_SSI_replacer_cb);
   if (NULL == SSIReplacementHandle2)
   {
-    printf(FAIL "test_SSIStringRegistration(4)");
+    printf(FAIL "test_SSIStringRegistration(4)\r\n");
     return -1;
   }
-  printf(PASS "test_SSIStringRegistration(register after deregister)");
+  printf(PASS "test_SSIStringRegistration(register after deregister)\r\n");
 
 #ifdef test_debugTablePrint
   http_SSI_printReplacerTable();
@@ -669,7 +669,7 @@ static char *path_index1_html = "/index1.html";
 int test_file_local_filesystem(void)
 {
   http_localfs_init();
-  http_file_filesystem_fp_t fp;
+  http_localfs_filesystem_fp_t fp;
 
   //register default index file into the local file system.
   int retval = http_localfs_registerFile(path_index1_html, (char *)&index1_html, index1_html_len, 0);
