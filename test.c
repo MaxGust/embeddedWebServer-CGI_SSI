@@ -605,7 +605,6 @@ int test_response_header(void)
 
   HTTP_response_headerRequest_t headerRequest;
   char headerBuffer[300];
-
   headerRequest.responseCode = HTTP_RESCODE_successSuccess;
   headerRequest.bodyLength = 1024;
   headerRequest.headerBuffer = (char *)&headerBuffer;
@@ -613,9 +612,18 @@ int test_response_header(void)
   headerRequest.transferEncoding = transferEnc_none;
   headerRequest.filePath = "/index.html";
 
-  http_response_response_header(headerRequest);
+  int retBufLen = 0;
+
+  retBufLen = http_response_response_header(headerRequest);
 
   char *expectedResponse1 = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 1024\r\n\r\n";
+
+  if (strlen(expectedResponse1) != (unsigned int)retBufLen)
+  {
+    printf(FAIL "test_response_header(response length missmatch (200 OK))\r\n");
+    return -1;
+  }
+
   if (0 != strcmp(headerBuffer, expectedResponse1))
   {
     printf("%s\r\n", headerBuffer);
@@ -626,9 +634,13 @@ int test_response_header(void)
   headerRequest.filePath = NULL;
   headerRequest.responseCode = HTTP_RESCODE_serrorInternalerror; //invalid with content. just for unit test
   headerRequest.contentType = HTTP_contentType_bin;
-  http_response_response_header(headerRequest);
+  retBufLen = http_response_response_header(headerRequest);
   char *expectedResponse2 = "HTTP/1.1 500 Internal Server Error\r\nContent-Type: application/octet-stream\r\nContent-Length: 1024\r\n\r\n";
-
+  if (strlen(expectedResponse2) != (unsigned int)retBufLen)
+  {
+    printf(FAIL "test_response_header(response length HTTP_RESCODE_cerrorNotfound (500 Internal Error))\r\n");
+    return -1;
+  }
   if (0 != strcmp(headerBuffer, expectedResponse2))
   {
     printf(FAIL "test_response_header(2)\r\n");
@@ -638,12 +650,18 @@ int test_response_header(void)
   //test chunked encoding with a different response code
   headerRequest.transferEncoding = transferEnc_chunked;
   headerRequest.responseCode = HTTP_RESCODE_cerrorNotfound;
-  http_response_response_header(headerRequest);
+  retBufLen = http_response_response_header(headerRequest);
   char *expectedResponse3 = "HTTP/1.1 404 Not Found\r\nContent-Type: application/octet-stream\r\nTransfer-Encoding: chunked\r\n\r\n";
+
+  if (strlen(expectedResponse3) != (unsigned int)retBufLen)
+  {
+    printf(FAIL "test_response_header(response length HTTP_RESCODE_cerrorNotfound)\r\n");
+    return -1;
+  }
 
   if (0 != strcmp(headerBuffer, expectedResponse3))
   {
-    printf(FAIL "test_response_header(3)\r\n");
+    printf(FAIL "test_response_header(HTTP_RESCODE_cerrorNotfound)\r\n");
     return -1;
   }
 
@@ -652,7 +670,8 @@ int test_response_header(void)
   int retval = http_response_response_header(headerRequest);
   if (retval >= 0)
   {
-    printf(FAIL "test_response_header(4)\r\n");
+    printf(FAIL "test_response_header(Short Buffer)\r\n");
+    return -1;
   }
 
   // printf("\r\n%s",headerBuffer);
@@ -904,7 +923,7 @@ void http_net_test_disconnect(int socket);
 
 int http_net_test_read(int socket, unsigned char *readBuffer, int readBufferLength, int timeoutMs)
 {
-  if ((0>socket) || (NULL == readBuffer) || (0 == readBufferLength) || (0 > timeoutMs))
+  if ((0 > socket) || (NULL == readBuffer) || (0 == readBufferLength) || (0 > timeoutMs))
   {
     return -1;
   }
@@ -912,7 +931,7 @@ int http_net_test_read(int socket, unsigned char *readBuffer, int readBufferLeng
 }
 int http_net_test_write(int socket, unsigned char *writeBuffer, int writeBufferLength, int timeoutMs)
 {
-  if ((0>socket) || (NULL == writeBuffer) || (0 == writeBufferLength) || (0 > timeoutMs))
+  if ((0 > socket) || (NULL == writeBuffer) || (0 == writeBufferLength) || (0 > timeoutMs))
   {
     return -1;
   }
@@ -920,7 +939,7 @@ int http_net_test_write(int socket, unsigned char *writeBuffer, int writeBufferL
 }
 void http_net_test_disconnect(int socket)
 {
-  if (0>socket)
+  if (0 > socket)
   {
   }
 }
@@ -932,7 +951,7 @@ int test_http_net(void)
   http_net_init_netopsStruct(&http_net_test_netops);
   printf(PASS "test_http_net(netops struct init)\r\n");
 
-  int socket=2;
+  int socket = 2;
   http_net_test_netops.http_net_read = http_net_test_read;
   http_net_test_netops.http_net_write = http_net_test_write;
   http_net_test_netops.http_net_disconnect = http_net_test_disconnect;
@@ -986,6 +1005,10 @@ int main(void)
   if (0 == retval)
   {
     printf(PASS "****************ALL TESTS PASSED****************\r\n\r\n");
+  }
+  else
+  {
+    printf(FAIL "!!!!!!!!!!!!!!!!SOME TEST(s) FAILED!!!!!!!!!!!!!!!!\r\n\r\n");
   }
   return retval;
 }

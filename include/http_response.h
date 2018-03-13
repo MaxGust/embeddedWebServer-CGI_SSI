@@ -201,10 +201,10 @@ typedef struct
         - responseBody    :  string buffer containing response to be sent out. can be NULL for responses without contents
         - responseCode    :  response_code_t typed response code to send back
         - headerBuffer    :  buffer to be used to pack response header
-        - bufferLength    :  length of headerBuffer
+        - bufferLength    :  pointer to length of headerBuffer. Will contain return buffer length when returning
         - transferEncoding : set to transferEnc_none at init. set to transferEnc_chunked for chunked encoding
     OUT: 
-        HTTP_SUCCESS on success
+        response buffer length
         value <0 on failure
 */
 int http_response_response_header(HTTP_response_headerRequest_t headerRequest);
@@ -218,4 +218,6 @@ http_response_contenttype_t http_response_get_contentType_string(http_response_f
 /*function to convert a content type to string*/
 int http_response_contentTypeToString(http_response_contenttype_t contentType, char *buffer, unsigned int length);
 
+/*function to init the response structure to nulls*/
+void http_response_initReponseStruct(HTTP_response_headerRequest_t *responseHeader);
 #endif

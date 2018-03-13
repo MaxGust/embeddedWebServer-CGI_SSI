@@ -9,7 +9,10 @@ static http_net_netops_t http_net_netops;
 /*init a plain fops structure*/
 void http_net_init_netopsStruct(http_net_netops_t *netops)
 {
-    memset(netops, 0, sizeof(http_net_netops_t));
+    if (NULL != netops)
+    {
+        memset(netops, 0, sizeof(http_net_netops_t));
+    }
 }
 /*function to register fops to http server*/
 http_net_netops_t *http_net_register_netops(http_net_netops_t netops)

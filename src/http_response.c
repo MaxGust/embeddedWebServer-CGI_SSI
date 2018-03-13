@@ -397,7 +397,15 @@ int http_response_response_header(HTTP_response_headerRequest_t headerRequest)
         printedChar += snprintf((headerRequest.headerBuffer + printedChar), headerRequest.bufferLength, "%s\r\n", contentLengthLine);
     }
 
-    snprintf((headerRequest.headerBuffer + printedChar), headerRequest.bufferLength, "\r\n");
+    printedChar+=snprintf((headerRequest.headerBuffer + printedChar), headerRequest.bufferLength, "\r\n");
+    return printedChar; //to return actual buffer length
+}
 
-    return HTTP_SUCCESS;
+void http_response_initReponseStruct(HTTP_response_headerRequest_t *responseHeader)
+{
+
+    if (NULL != responseHeader)
+    {
+        memset(responseHeader, 0, sizeof(HTTP_response_headerRequest_t));
+    }
 }

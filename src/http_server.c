@@ -15,28 +15,42 @@
 
 int http_server(int socket, http_net_netops_t *netops)
 {
-    unsigned char http_buffer[HTTP_SERVER_BUFFER_SIZE];
-    if(NULL==netops->http_net_read){
-        PRINT_ERROR("netops read not initialized(%d)\r\n",(int)netops);
+    unsigned char httpReadBuffer[HTTP_SERVER_READ_BUFFER_SIZE];
+    char httpWriteBuffer[HTTP_SERVER_WRITE_BUFFER_SIZE];
+    if ((NULL == netops->http_net_read)||(NULL == netops->http_net_write))
+    {
+        PRINT_ERROR("netops read not initialized(%d)\r\n", (int)netops);
         return -1;
     }
-    int byteCount = netops->http_net_read(socket, (unsigned char *)&http_buffer, HTTP_SERVER_BUFFER_SIZE, HTTP_SERVER_TIMOUT_MS);
+    int byteCount = netops->http_net_read(socket, (unsigned char *)&httpReadBuffer, HTTP_SERVER_READ_BUFFER_SIZE, HTTP_SERVER_TIMOUT_MS);
     if (byteCount <= 0)
     {
+        PRINT_ERROR("netops read timedout(%d)\r\n", byteCount);
         return -1; //most probably a timeout error to read from client
     }
 
-    //now the request headers are in buffer. time to parse teh request
+    //now the request headers are in buffer. time to parse the request
     http_request_t http_request;
-    parseRquest_identifyRequest(http_buffer, &http_request);
+    parseRquest_identifyRequest(httpReadBuffer, &http_request);
+    void* fp;
+    int retval=0;
+    HTTP_response_headerRequest_t httpResponse;
+    http_response_initReponseStruct(&httpResponse);
+    httpResponse.headerBuffer=(char*)&httpWriteBuffer;
+    httpResponse.bufferLength=HTTP_SERVER_WRITE_BUFFER_SIZE;
 
     switch (http_request.method)
     {
     case GET:
         switch (http_request.fileClass)
         {
-        case httpFileType_none:     //regular File processing flow
-
+        case httpFileType_none: //regular File processing flow
+                fp=http_file_fops.fopen(http_request.httpFilePath);
+                if(NULL==fp){//file not found
+                    httpResponse.responseCode=HTTP_RESCODE_cerrorNotfound;
+                    retval=http_response_response_header(httpResponse);
+                    //check retval write and disconnect
+                }
             break;
         case httpFileType_SSI:
             break;
