@@ -31,6 +31,7 @@ int test_response_header(void);
 int test_file_local_filesystem(void);
 int test_http_file(void);
 int test_http_net(void);
+int test_http_server(void);
 
 int test_methodFileType(void)
 {
@@ -976,6 +977,18 @@ int test_http_net(void)
   return 0;
 }
 
+//http_server_test
+int test_http_server(void){
+  //deinit and init the FS
+  //register files
+  //register fops
+  //register dummy netops
+  //socket1 test - non-existant file
+
+  printf(PASS ">>test_http_server<<\r\n");
+  return 0;
+}
+
 int main(void)
 {
   //testing request method and path parsing
@@ -1002,6 +1015,8 @@ int main(void)
     retval = -9;
   if (0 != test_http_net())
     retval = -10;
+  if (0 != test_http_server())
+    retval = -11;
   if (0 == retval)
   {
     printf(PASS "****************ALL TESTS PASSED****************\r\n\r\n");

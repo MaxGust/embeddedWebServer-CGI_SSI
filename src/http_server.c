@@ -17,7 +17,7 @@ int http_server(int socket, http_net_netops_t *netops)
 {
     unsigned char httpReadBuffer[HTTP_SERVER_READ_BUFFER_SIZE];
     char httpWriteBuffer[HTTP_SERVER_WRITE_BUFFER_SIZE];
-    if ((NULL == netops->http_net_read)||(NULL == netops->http_net_write))
+    if ((NULL == netops->http_net_read) || (NULL == netops->http_net_write))
     {
         PRINT_ERROR("netops read not initialized(%d)\r\n", (int)netops);
         return -1;
@@ -32,12 +32,12 @@ int http_server(int socket, http_net_netops_t *netops)
     //now the request headers are in buffer. time to parse the request
     http_request_t http_request;
     parseRquest_identifyRequest(httpReadBuffer, &http_request);
-    void* fp;
-    int retval=0;
+    void *fp;
+    int retBufLen = 0;
     HTTP_response_headerRequest_t httpResponse;
     http_response_initReponseStruct(&httpResponse);
-    httpResponse.headerBuffer=(char*)&httpWriteBuffer;
-    httpResponse.bufferLength=HTTP_SERVER_WRITE_BUFFER_SIZE;
+    httpResponse.headerBuffer = (char *)&httpWriteBuffer;
+    httpResponse.bufferLength = HTTP_SERVER_WRITE_BUFFER_SIZE;
 
     switch (http_request.method)
     {
@@ -45,12 +45,33 @@ int http_server(int socket, http_net_netops_t *netops)
         switch (http_request.fileClass)
         {
         case httpFileType_none: //regular File processing flow
-                fp=http_file_fops.fopen(http_request.httpFilePath);
-                if(NULL==fp){//file not found
-                    httpResponse.responseCode=HTTP_RESCODE_cerrorNotfound;
-                    retval=http_response_response_header(httpResponse);
-                    //check retval write and disconnect
+            if (NULL != http_file_fops.fopen)
+            { //else FS is not mounted
+                fp = http_file_fops.fopen(http_request.httpFilePath);
+            }
+            else
+            {
+                PRINT_ERROR("fops not mounted(%d)\r\n", httpFileType_none);
+                fp = NULL;
+            }
+            if (NULL == fp)
+            { //file not found due to missing file or missing FS
+                httpResponse.responseCode = HTTP_RESCODE_cerrorNotfound;
+                retBufLen = http_response_response_header(httpResponse);
+
+                //check retval write and disconnect
+                if (retBufLen <= 0)
+                {
+                    PRINT_ERROR("error forming 404 header (%d)\r\n", httpFileType_none);
+                    return -1;
                 }
+                netops->http_net_write(socket, (unsigned char*)httpWriteBuffer, retBufLen, HTTP_SERVER_TIMOUT_MS);
+                netops->http_net_disconnect(socket);
+                return 0;
+            }
+            else
+            { //file found . do read, determine if chunking is required, write accordingly and disconnect
+            }
             break;
         case httpFileType_SSI:
             break;
