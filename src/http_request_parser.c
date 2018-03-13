@@ -73,17 +73,17 @@ static httpFileType_code_t parseRequest_identifyFileClass(char *path)
 
     return httpFileType_none;
 }
-int parseRquest_identifyRequest(char *requestBuffer, http_request_t *httpRequest)
+int parseRquest_identifyRequest(unsigned char *requestBuffer, http_request_t *httpRequest)
 {
     /*TODO: suppot Query parsing*/
-    const char *startOfPath = strchr(requestBuffer, ' ') + 1;
+    const char *startOfPath = strchr((char*)requestBuffer, ' ') + 1;
     const char *endOfPath;
 
-    if (strstr(requestBuffer, "?"))
+    if (strstr((char*)requestBuffer, "?"))
     { //if there is a query string, path ends at the start of query
         endOfPath = strchr(startOfPath, '?');
     }
-    else if (strstr(requestBuffer, "HTTP/1."))
+    else if (strstr((char*)requestBuffer, "HTTP/1."))
     { //if there is a HTTP version mentioned, path ends there
         endOfPath = strchr(startOfPath, ' ');
     }
@@ -93,7 +93,7 @@ int parseRquest_identifyRequest(char *requestBuffer, http_request_t *httpRequest
     }
     //getting enough memory
     //TODO: will this work in embedded?
-    char *methordToken = strtok(requestBuffer, " ");
+    char *methordToken = strtok((char*)requestBuffer, " ");
     char method[strlen(methordToken) + 1];
     char path[endOfPath - startOfPath];
 

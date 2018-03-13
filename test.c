@@ -34,7 +34,7 @@ int test_http_net(void);
 
 int test_methodFileType(void)
 {
-  char requestBuffer[] = "GET /ta.gs/ref_htt%20%20pmethods.shtm\r\ncache-control: no-cache\r\naccept-encoding: gzip, deflate\r\n\r\n";
+  unsigned char requestBuffer[] = "GET /ta.gs/ref_htt%20%20pmethods.shtm\r\ncache-control: no-cache\r\naccept-encoding: gzip, deflate\r\n\r\n";
   int retVal = 0;
   http_request_t request;
   //printf("%s\r\n", requestBuffer);
@@ -898,29 +898,29 @@ int test_http_file(void)
 }
 
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-int http_net_test_read(http_net_netops_t *http_net_network, unsigned char *readBuffer, int readBufferLength, int timeoutMs);
-int http_net_test_write(http_net_netops_t *http_net_network, unsigned char *readBuffer, int readBufferLength, int timeoutMs);
-void http_net_test_disconnect(http_net_netops_t *http_net_network);
+int http_net_test_read(int socket, unsigned char *readBuffer, int readBufferLength, int timeoutMs);
+int http_net_test_write(int socket, unsigned char *readBuffer, int readBufferLength, int timeoutMs);
+void http_net_test_disconnect(int socket);
 
-int http_net_test_read(http_net_netops_t *http_net_network, unsigned char *readBuffer, int readBufferLength, int timeoutMs)
+int http_net_test_read(int socket, unsigned char *readBuffer, int readBufferLength, int timeoutMs)
 {
-  if ((NULL == http_net_network) || (NULL == readBuffer) || (0 == readBufferLength) || (0 > timeoutMs))
+  if ((0>socket) || (NULL == readBuffer) || (0 == readBufferLength) || (0 > timeoutMs))
   {
     return -1;
   }
   return 0;
 }
-int http_net_test_write(http_net_netops_t *http_net_network, unsigned char *writeBuffer, int writeBufferLength, int timeoutMs)
+int http_net_test_write(int socket, unsigned char *writeBuffer, int writeBufferLength, int timeoutMs)
 {
-  if ((NULL == http_net_network) || (NULL == writeBuffer) || (0 == writeBufferLength) || (0 > timeoutMs))
+  if ((0>socket) || (NULL == writeBuffer) || (0 == writeBufferLength) || (0 > timeoutMs))
   {
     return -1;
   }
   return 0;
 }
-void http_net_test_disconnect(http_net_netops_t *http_net_network)
+void http_net_test_disconnect(int socket)
 {
-  if (NULL == http_net_network)
+  if (0>socket)
   {
   }
 }
@@ -932,7 +932,7 @@ int test_http_net(void)
   http_net_init_netopsStruct(&http_net_test_netops);
   printf(PASS "test_http_net(netops struct init)\r\n");
 
-  http_net_test_netops.socket = 1;
+  int socket=2;
   http_net_test_netops.http_net_read = http_net_test_read;
   http_net_test_netops.http_net_write = http_net_test_write;
   http_net_test_netops.http_net_disconnect = http_net_test_disconnect;
@@ -941,13 +941,13 @@ int test_http_net(void)
   printf(PASS "test_http_net(netops registration)\r\n");
 
   unsigned char readBuffer[10];
-  httpNetops->http_net_read(httpNetops, (unsigned char *)&readBuffer, 10, 0);
+  httpNetops->http_net_read(socket, (unsigned char *)&readBuffer, 10, 0);
   printf(PASS "test_http_net(netops read call)\r\n");
 
-  httpNetops->http_net_write(httpNetops, (unsigned char *)&readBuffer, 10, 0);
+  httpNetops->http_net_write(socket, (unsigned char *)&readBuffer, 10, 0);
   printf(PASS "test_http_net(netops write call)\r\n");
 
-  httpNetops->http_net_disconnect(httpNetops);
+  httpNetops->http_net_disconnect(socket);
   printf(PASS "test_http_net(netops disconnect call)\r\n");
 
   http_net_deregister_netops();
@@ -982,7 +982,7 @@ int main(void)
   if (0 != test_http_file())
     retval = -9;
   if (0 != test_http_net())
-    retval = -9;
+    retval = -10;
   if (0 == retval)
   {
     printf(PASS "****************ALL TESTS PASSED****************\r\n\r\n");

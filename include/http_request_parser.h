@@ -23,6 +23,7 @@ typedef enum {
     httpFileType_SSI,
     httpFileType_CGI
 } httpFileType_code_t; //enum to identify regular, SSI or CGI file types.
+//TODO: refactor this name to httpFileClass
 
 //parsed HTTP request
 typedef struct
@@ -35,6 +36,6 @@ typedef struct
 /*
 parse and identify a request
 */
-int parseRquest_identifyRequest(char *requestBuffer, http_request_t *httpRequest);
+int parseRquest_identifyRequest(unsigned char *requestBuffer, http_request_t *httpRequest);
 
 #endif

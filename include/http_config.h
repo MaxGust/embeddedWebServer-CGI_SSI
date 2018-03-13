@@ -17,4 +17,10 @@
 //populate a default index for local FS
 #define HTTP_LOCALFS_INDEX
 
+//server buffer size
+#define HTTP_SERVER_BUFFER_SIZE 1024
+
+//server read timeout
+#define HTTP_SERVER_TIMOUT_MS 100
+
 #endif

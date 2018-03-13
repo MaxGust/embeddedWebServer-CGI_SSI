@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-/*currently supporting only one file system at a time - should this go into http_server.c?*/
+/*currently supporting only one network at a time - should this go into http_server.c?*/
 static http_net_netops_t http_net_netops;
 
 /*init a plain fops structure*/
