@@ -22,12 +22,12 @@ typedef enum {
     httpFileClass_none = 0,
     httpFileClass_SSI,
     httpFileClass_CGI
-} httpRequest_file_class_t; //enum to identify regular, SSI or CGI file types.
+} httpRequest_fileClass_t; //enum to identify regular, SSI or CGI file types.
 
 //parsed HTTP request
 typedef struct
 {
-    httpRequest_file_class_t fileClass;            //contains the file type
+    httpRequest_fileClass_t fileClass;            //contains the file type
     httpRequest_method_t method;             // contains teh requested method
     char httpFilePath[HTTP_MAX_PATH_LENGTH]; //contains file path
 } http_request_t;                            //struct to hold results of parsing a HTTP request. Later header can be added here.
