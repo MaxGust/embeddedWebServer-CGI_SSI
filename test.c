@@ -1083,7 +1083,7 @@ int http_server_dummy_write(int socket, unsigned char *writeBuffer, int writeBuf
       headerBody = 0; //set for next test
       if (0 != strncmp((char *)writeBuffer, (char *)index1_html, index1_html_len))
       {
-        printf(FAIL "test_http_server (HTML 200 OK body test)\r\n");
+        printf(FAIL "test_http_server (HTML 200 OK body test (%d,%d))\r\n",index1_html_len, writeBufferLength);
         return -1;
       }
       printf(PASS "test_http_server (HTML 200 OK body test(%d,%d))\r\n", index1_html_len, writeBufferLength);
