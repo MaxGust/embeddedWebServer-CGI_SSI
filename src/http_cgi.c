@@ -7,6 +7,8 @@
 /*defining this as array for the following reasons
 1) lookup speed is better than linked list
 2) configuration is static and fixed at compile time. This can be adjusted in http_config.h 
+
+return actual buffer content length on success. -1 on failure
 */
 http_CGI_pathFunction_t CGI_path[HTTP_MAX_CGI_SIZE]; //hoping compiler to do its job and init to 0
 

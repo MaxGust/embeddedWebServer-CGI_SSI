@@ -203,7 +203,7 @@ int exec1_CGI_cb(const char *CGIPath, char *replacerBuffer, unsigned int bufferL
   }
   strncpy(replacerBuffer, "exec1 Executed", bufferLength);
   replacerBuffer[bufferLength] = 0;
-  return 0;
+  return (int)strlen("exec1 Executed");
 }
 int exec2_CGI_cb(const char *CGIPath, char *replacerBuffer, unsigned int bufferLength)
 {
@@ -213,7 +213,7 @@ int exec2_CGI_cb(const char *CGIPath, char *replacerBuffer, unsigned int bufferL
   }
   strncpy(replacerBuffer, "exec2 Executed", bufferLength);
   replacerBuffer[bufferLength] = 0;
-  return 0;
+  return (int)strlen("exec2 Executed");
 }
 int exec3_CGI_cb(const char *CGIPath, char *replacerBuffer, unsigned int bufferLength)
 {
@@ -223,7 +223,7 @@ int exec3_CGI_cb(const char *CGIPath, char *replacerBuffer, unsigned int bufferL
   }
   strncpy(replacerBuffer, "exec3 executed", bufferLength);
   replacerBuffer[bufferLength] = 0;
-  return 0;
+  return (int)strlen("exec3 Executed");
 }
 
 /*unit test for CGI*/
@@ -312,7 +312,7 @@ int test_CGI_exec(void)
 {
   char stringArray[100];
   //try for exec of "/CGI/exec1.cgi"
-  if (0 == http_CGI_exec_pathFunction("/CGI/exec1.cgi", (char *)&stringArray, sizeof(stringArray)))
+  if (strlen("exec1 Executed") == http_CGI_exec_pathFunction("/CGI/exec1.cgi", (char *)&stringArray, sizeof(stringArray)))
   {
     if (0 != strcmp(stringArray, "exec1 Executed"))
     {
@@ -322,7 +322,7 @@ int test_CGI_exec(void)
   }
 
   //try for a non-existant SSI string
-  if (0 == http_CGI_exec_pathFunction("nonExistantVal", (char *)&stringArray, sizeof(stringArray)))
+  if (http_CGI_exec_pathFunction("nonExistantVal", (char *)&stringArray, sizeof(stringArray))>=0)
   {
     printf(FAIL "test_CGI_exec(2)\r\n");
     return -1;

@@ -9,7 +9,7 @@ callback to be registered for CGI path function along with a string.
 When a registered CGI path function is found in the page, the associated callback will be called to 
 provide the dynamic replacement contents 
 
-populate the buffer with required contents and return 0 for success;
+populate the buffer with required contents and returns actual buffer content length for success, -1 for failure
 */
 
 typedef int (*http_CGI_pathFunction_cb)(const char *CGIPath, char *replacerBuffer, unsigned int bufferLength);

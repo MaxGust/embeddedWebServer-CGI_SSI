@@ -123,6 +123,9 @@ int http_server(int socket, http_net_netops_t *netops)
                 }
                 return 0;
             }
+            else{//time to execute cgi
+                
+            }
         }
         break;
         default:
