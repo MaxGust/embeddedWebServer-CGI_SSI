@@ -152,7 +152,7 @@ size_t http_localfs_fread(void *ptr, size_t size, size_t nmemb, http_localfs_fil
 
         if (remainingLen <= totalReadLength)
         { //when size is smaller than actual file size
-            memcpy(ptr, (void *)&http_local_filesystem[fp->fileNumber].file[fp->filePosition], remainingLen);
+            memcpy(ptr, (void *)&http_local_filesystem[fp->fileNumber].file[fp->filePosition], remainingLen+1);
             fp->filePosition += remainingLen;
             return (size_t)remainingLen+1;
         }
@@ -160,7 +160,7 @@ size_t http_localfs_fread(void *ptr, size_t size, size_t nmemb, http_localfs_fil
         {
             memcpy(ptr, (void *)&http_local_filesystem[fp->fileNumber].file[fp->filePosition], totalReadLength);
             fp->filePosition += totalReadLength;
-            return (size_t)totalReadLength+1;
+            return (size_t)totalReadLength;
         }
     }
     return -1;

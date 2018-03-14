@@ -7,6 +7,7 @@
 #include "http_response.h"
 #include "http_server.h"
 #include "http_cgi.h"
+#include "string.h"
 
 /*this connection is a per-connection server
     precondition: 
@@ -119,7 +120,43 @@ int http_server(int socket, http_net_netops_t *netops)
                     return 0;
                 }
                 else
-                { //time to do chunked encoding
+                {                                                            //time to do chunked encoding
+                    httpResponse.responseCode = HTTP_RESCODE_successSuccess; //200 OK
+                    httpResponse.bodyLength=0;
+                    httpResponse.transferEncoding = transferEnc_chunked;     //set chunked encoding since we dont know actual length yet
+                    httpResponse.filePath = http_request.httpFilePath;       //path to be used for contentType
+                    retBufLen = http_response_response_header(httpResponse);
+                    //check retval write and disconnect
+                    if (retBufLen <= 0)
+                    {
+                        PRINT_ERROR("error forming 200 header (%d)\r\n", retBufLen);
+                        return -1;
+                    }
+                    //send out the response header
+                    netops->http_net_write(socket, (unsigned char *)httpHeaderBuffer, retBufLen, HTTP_SERVER_TIMOUT_MS); //write header
+                    char chunkedHeader[20];
+
+                    //first write the contents we have read already
+                    sprintf(chunkedHeader, "%04X\r\n", readLen);
+                    //write size
+                    netops->http_net_write(socket, (unsigned char *)chunkedHeader, strlen(chunkedHeader), HTTP_SERVER_TIMOUT_MS);
+                    //write contents
+                    netops->http_net_write(socket, (unsigned char *)freadBuffer, readLen, HTTP_SERVER_TIMOUT_MS);
+                    netops->http_net_write(socket, (unsigned char*)"\r\n", 2, HTTP_SERVER_TIMOUT_MS);
+                    do
+                    { //now read and write remaining contents
+                        readLen = http_file_fops.fread(&freadBuffer, sizeof(freadBuffer), 1, fp);
+                        sprintf(chunkedHeader, "%04X\r\n", readLen);
+                        //write size
+                        netops->http_net_write(socket, (unsigned char *)chunkedHeader, strlen(chunkedHeader), HTTP_SERVER_TIMOUT_MS);
+                        //write contents
+                        netops->http_net_write(socket, (unsigned char *)freadBuffer, readLen, HTTP_SERVER_TIMOUT_MS);
+                        netops->http_net_write(socket, (unsigned char*)"\r\n", 2, HTTP_SERVER_TIMOUT_MS);
+                    } while (!http_file_fops.feof(fp));
+
+                    //send last 0\r\n\r\n
+                    netops->http_net_write(socket, (unsigned char*)"0\r\n\r\n", 5, HTTP_SERVER_TIMOUT_MS);
+                    netops->http_net_disconnect(socket);
                 }
             }
             break;
@@ -159,8 +196,8 @@ int http_server(int socket, http_net_netops_t *netops)
                     httpResponse.responseCode = HTTP_RESCODE_successSuccess; //200 OK
                     httpResponse.bodyLength = retBufLength;
                     httpResponse.filePath = http_request.httpFilePath;
-                    http_response_contenttype_t contentType=http_cgi_get_contentType(http_CGI_get_pathFunctionHandle(http_request.httpFilePath));
-                    httpResponse.contentType=contentType;
+                    http_response_contenttype_t contentType = http_cgi_get_contentType(http_CGI_get_pathFunctionHandle(http_request.httpFilePath));
+                    httpResponse.contentType = contentType;
                     retBufLen = http_response_response_header(httpResponse);
                     //check retval write and disconnect
                     if (retBufLen <= 0)
