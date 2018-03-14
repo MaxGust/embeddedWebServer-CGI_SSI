@@ -19,9 +19,9 @@ typedef enum {
 
 //file type indicator
 typedef enum {
-    httpFileType_none = 0,
-    httpFileType_SSI,
-    httpFileType_CGI
+    httpFileClass_none = 0,
+    httpFileClass_SSI,
+    httpFileClass_CGI
 } httpRequest_file_class_t; //enum to identify regular, SSI or CGI file types.
 
 //parsed HTTP request

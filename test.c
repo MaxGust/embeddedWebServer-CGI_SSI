@@ -43,7 +43,7 @@ int test_methodFileType(void)
   retVal = parseRquest_identifyRequest(requestBuffer, &request);
   if (HTTP_SUCCESS == retVal)
   {
-    if ((httpFileType_SSI == request.fileClass) && (GET == request.method) && (0 == strcmp(request.httpFilePath, "/ta.gs/ref_htt  pmethods.shtm")))
+    if ((httpFileClass_SSI == request.fileClass) && (GET == request.method) && (0 == strcmp(request.httpFilePath, "/ta.gs/ref_htt  pmethods.shtm")))
     {
       printf(PASS "test_methodFileType (SSI GET)\r\n");
       return 0;

@@ -61,14 +61,14 @@ int http_server(int socket, http_net_netops_t *netops)
     case GET:
         switch (http_request.fileClass)
         {
-        case httpFileType_none: //regular File processing flow
+        case httpFileClass_none: //regular File processing flow
             if (NULL != http_file_fops.fopen)
             { //else FS is not mounted
                 fp = http_file_fops.fopen(http_request.httpFilePath);
             }
             else
             {
-                PRINT_ERROR("fops not mounted(%d)\r\n", httpFileType_none);
+                PRINT_ERROR("fops not mounted(%d)\r\n", httpFileClass_none);
                 fp = NULL;
             }
             if (NULL == fp)
@@ -94,7 +94,7 @@ int http_server(int socket, http_net_netops_t *netops)
                     //check retval write and disconnect
                     if (retBufLen <= 0)
                     {
-                        PRINT_ERROR("error forming 404 header (%d)\r\n", httpFileType_none);
+                        PRINT_ERROR("error forming 404 header (%d)\r\n", httpFileClass_none);
                         return -1;
                     }
                     netops->http_net_write(socket, (unsigned char *)httpHeaderBuffer, retBufLen, HTTP_SERVER_TIMOUT_MS); //write header
@@ -107,9 +107,9 @@ int http_server(int socket, http_net_netops_t *netops)
                 }
             }
             break;
-        case httpFileType_SSI:
+        case httpFileClass_SSI:
             break;
-        case httpFileType_CGI:
+        case httpFileClass_CGI:
         {
             http_CGI_pathFunctionHandle_t cgiPathFunctionHandle = 0;
             cgiPathFunctionHandle = http_CGI_get_pathFunctionHandle(http_request.httpFilePath);

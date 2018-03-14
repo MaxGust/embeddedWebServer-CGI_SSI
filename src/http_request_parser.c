@@ -51,7 +51,7 @@ static httpRequest_file_class_t parseRequest_identifyFileClass(char *path)
     char *fileType = strrchr(path, '.'); //can hit some real corner case where there is no extension and thre is a . in path
     if (0 == fileType)
     {
-        return httpFileType_none;
+        return httpFileClass_none;
     }
     else
     {
@@ -62,16 +62,16 @@ static httpRequest_file_class_t parseRequest_identifyFileClass(char *path)
     for (i = 0; i < httpFileType_SSIList_size; i++)
     {
         if (0 == strcmp(httpFileType_SSIList[i], fileType))
-            return httpFileType_SSI;
+            return httpFileClass_SSI;
     }
 
     for (i = 0; i < httpFileType_CGIList_size; i++)
     {
         if (0 == strcmp(httpFileType_CGIList[i], fileType))
-            return httpFileType_CGI;
+            return httpFileClass_CGI;
     }
 
-    return httpFileType_none;
+    return httpFileClass_none;
 }
 int parseRquest_identifyRequest(unsigned char *requestBuffer, http_request_t *httpRequest)
 {
