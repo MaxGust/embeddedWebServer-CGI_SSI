@@ -363,18 +363,16 @@ int http_response_response_header(HTTP_response_headerRequest_t headerRequest)
     }
 
     //handle content length and transfer encoding.
-    if (0 != headerRequest.bodyLength) //content length is applicable only when there is content
+
+    if (transferEnc_chunked == headerRequest.transferEncoding)
     {
-        if (transferEnc_chunked == headerRequest.transferEncoding)
-        {
-            snprintf(contentLengthLine, HTTP_RESPONSE_CONLEN_LENGTH, HTTP_RESHEADER_TRANSFER_ENCODING ": chunked");
-            contentLengthLineDone = 1;
-        }
-        else
-        {
-            snprintf(contentLengthLine, HTTP_RESPONSE_CONLEN_LENGTH, HTTP_RESHEADER_CONTENT_LENGTH ": %d", headerRequest.bodyLength);
-            contentLengthLineDone = 1;
-        }
+        snprintf(contentLengthLine, HTTP_RESPONSE_CONLEN_LENGTH, HTTP_RESHEADER_TRANSFER_ENCODING ": chunked");
+        contentLengthLineDone = 1;
+    }
+    else if (0 != headerRequest.bodyLength) //content length is applicable only when there is content
+    {
+        snprintf(contentLengthLine, HTTP_RESPONSE_CONLEN_LENGTH, HTTP_RESHEADER_CONTENT_LENGTH ": %d", headerRequest.bodyLength);
+        contentLengthLineDone = 1;
     }
 
     //final Assembly
@@ -397,7 +395,7 @@ int http_response_response_header(HTTP_response_headerRequest_t headerRequest)
         printedChar += snprintf((headerRequest.headerBuffer + printedChar), headerRequest.bufferLength, "%s\r\n", contentLengthLine);
     }
 
-    printedChar+=snprintf((headerRequest.headerBuffer + printedChar), headerRequest.bufferLength, "\r\n");
+    printedChar += snprintf((headerRequest.headerBuffer + printedChar), headerRequest.bufferLength, "\r\n");
     return printedChar; //to return actual buffer length
 }
 
