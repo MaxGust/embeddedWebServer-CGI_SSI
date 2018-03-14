@@ -2,6 +2,7 @@
 #define __HTTP_CGI_H__
 
 #include "http_config.h"
+#include "http_response.h" //for contentType
 
 /*
 callback to be registered for CGI path function along with a string. 
@@ -20,15 +21,17 @@ typedef struct
 {
     char *CGI_path;
     http_CGI_pathFunction_cb CGI_pathFunction;
+    http_response_contenttype_t contentType;
 } http_CGI_pathFunction_t;
 
 typedef http_CGI_pathFunction_t *http_CGI_pathFunctionHandle_t;
 /*function used to register a CGI pathFunction function. 
-    IN : "static" string to be replaced and associated callback function
+    IN : CGI path, associated callback function and contentType of function output
+         contentType will be used to form response header
     OUT : 0  = Success
         : -1 = Failure
 */
-http_CGI_pathFunctionHandle_t http_CGI_register_pathFunction(const char *CGIPath, http_CGI_pathFunction_cb CGIPathFunctionCb);
+http_CGI_pathFunctionHandle_t http_CGI_register_pathFunction(const char *CGIPath, http_CGI_pathFunction_cb CGIPathFunctionCb, http_response_contenttype_t contentType);
 
 /*function to populate replacement buffer*/
 int http_CGI_exec_pathFunction(char *CGIPath, char *replacerBuffer, unsigned int bufferLength);
@@ -43,5 +46,8 @@ void http_CGI_deRegister_all(void);
 
 /*debug function to print teh complete registration table*/
 void http_CGI_printPathFunctionTable(void);
+
+/*get return content type of a specified path function using its handle*/
+http_response_contenttype_t http_cgi_get_contentType(http_CGI_pathFunctionHandle_t pathFunctionHandle);
 
 #endif

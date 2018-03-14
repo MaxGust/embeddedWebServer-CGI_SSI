@@ -234,32 +234,49 @@ int test_CGI_registration(void)
   char *cgiPath3 = "/exec3.exe";
 
   http_CGI_pathFunction_t *cgiPathHandle1;
-  cgiPathHandle1 = http_CGI_register_pathFunction(cgiPath1, exec1_CGI_cb);
+  cgiPathHandle1 = http_CGI_register_pathFunction(cgiPath1, exec1_CGI_cb, HTTP_contentType_bin);
   if (NULL == cgiPathHandle1)
   {
-    printf(FAIL "test_CGI(1)");
+    printf(FAIL "test_CGI(1)\r\n");
     return -1;
   }
+  if (HTTP_contentType_bin != http_cgi_get_contentType(cgiPathHandle1))
+  {
+    printf(FAIL "test_CGI(cgiPathHandle1 content type)\r\n");
+    return -1;
+  }
+
 #ifdef tesst_printPathFunctionTable
   http_CGI_printPathFunctionTable();
 #endif
 
   http_CGI_pathFunction_t *cgiPathHandle2;
-  cgiPathHandle2 = http_CGI_register_pathFunction(cgiPath2, exec2_CGI_cb);
+  cgiPathHandle2 = http_CGI_register_pathFunction(cgiPath2, exec2_CGI_cb, HTTP_contentType_bin);
   if (NULL == cgiPathHandle2)
   {
     printf(FAIL "test_CGI(2)");
     return -1;
   }
+  if (HTTP_contentType_bin != http_cgi_get_contentType(cgiPathHandle2))
+  {
+    printf(FAIL "test_CGI(cgiPathHandle2 content type)\r\n");
+    return -1;
+  }
+
 #ifdef tesst_printPathFunctionTable
   http_CGI_printPathFunctionTable();
 #endif
 
   http_CGI_pathFunction_t *cgiPathHandle3;
-  cgiPathHandle3 = http_CGI_register_pathFunction(cgiPath3, exec3_CGI_cb);
+  cgiPathHandle3 = http_CGI_register_pathFunction(cgiPath3, exec3_CGI_cb, HTTP_contentType_json);
   if (NULL == cgiPathHandle3)
   {
     printf(FAIL "test_CGI(3)");
+    return -1;
+  }
+  if (HTTP_contentType_json != http_cgi_get_contentType(cgiPathHandle3))
+  {
+    printf(FAIL "test_CGI(cgiPathHandle3 content type)\r\n");
     return -1;
   }
 #ifdef tesst_printPathFunctionTable
@@ -272,10 +289,15 @@ int test_CGI_registration(void)
 #endif
 
   //multiple registrations of the same CB
-  cgiPathHandle2 = http_CGI_register_pathFunction(cgiPath3, exec3_CGI_cb);
+  cgiPathHandle2 = http_CGI_register_pathFunction(cgiPath3, exec3_CGI_cb, HTTP_contentType_plaintext);
   if (NULL == cgiPathHandle2)
   {
     printf(FAIL "test_CGI(4)");
+    return -1;
+  }
+  if (HTTP_contentType_plaintext != http_cgi_get_contentType(cgiPathHandle2))
+  {
+    printf(FAIL "test_CGI(cgiPathHandle2 [rereg] content type)\r\n");
     return -1;
   }
 #ifdef tesst_printPathFunctionTable
@@ -1011,8 +1033,8 @@ int http_server_dummy_write(int socket, unsigned char *writeBuffer, int writeBuf
 {
   char *sock1RetString = "HTTP/1.1 404 Not Found\r\n\r\n";
   char *sock2RetHeader = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 59\r\n\r\n";
-static int headerBody = 0;
-size_t compLen;
+  static int headerBody = 0;
+  size_t compLen;
   if ((0 > socket) || (NULL == writeBuffer) || (0 == writeBufferLength) || (0 > timeoutMs))
   {
     return -1;
@@ -1020,7 +1042,7 @@ size_t compLen;
   switch (socket)
   {
   case 1:
-    compLen=sizeof(sock1RetString);
+    compLen = sizeof(sock1RetString);
     if (0 != strncmp((char *)writeBuffer, sock1RetString, compLen))
     {
       printf(FAIL "test_http_server (404 filenot found)\r\n");
@@ -1031,8 +1053,8 @@ size_t compLen;
   case 2:
     if (0 == headerBody)
     { //expecting header to be written
-      compLen=sizeof(sock2RetHeader);
-      if (0 != strncmp( sock2RetHeader,(char *)writeBuffer, compLen))
+      compLen = sizeof(sock2RetHeader);
+      if (0 != strncmp(sock2RetHeader, (char *)writeBuffer, compLen))
       {
         printf(FAIL "test_http_server (200 OK header test)\r\n");
         return -1;
@@ -1043,12 +1065,12 @@ size_t compLen;
     }
     else if (1 == headerBody)
     {
-      if (0 != strncmp((char*)writeBuffer, (char*)index1_html, index1_html_len))
+      if (0 != strncmp((char *)writeBuffer, (char *)index1_html, index1_html_len))
       {
         printf(FAIL "test_http_server (200 OK body test)\r\n");
         return -1;
       }
-      printf(PASS "test_http_server (200 OK body test(%d,%d))\r\n",index1_html_len,writeBufferLength);
+      printf(PASS "test_http_server (200 OK body test(%d,%d))\r\n", index1_html_len, writeBufferLength);
       return 0;
     }
     break;
@@ -1106,7 +1128,7 @@ int test_http_server(void)
   {
     return -1;
   }
-  if (0>http_server(2, httpNetops))
+  if (0 > http_server(2, httpNetops))
   {
     return -1;
   }

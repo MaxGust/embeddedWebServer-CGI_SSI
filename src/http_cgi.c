@@ -26,10 +26,10 @@ int http_CGI_exec_pathFunction(char *CGIPath, char *replacerBuffer, unsigned int
     return -1;
 }
 
-http_CGI_pathFunctionHandle_t http_CGI_register_pathFunction(const char *CGIPath, http_CGI_pathFunction_cb CGIPathFunctionCb)
+http_CGI_pathFunctionHandle_t http_CGI_register_pathFunction(const char *CGIPath, http_CGI_pathFunction_cb CGIPathFunctionCb, http_response_contenttype_t contentType)
 {
     //find a uninitialized array element
-    if ((NULL == CGIPath) || (NULL == CGIPathFunctionCb))
+    if ((NULL == CGIPath) || (NULL == CGIPathFunctionCb) || (0 == contentType))
     {
         PRINT_ERROR("ERROR: http_CGI_register_pathFunction - NULL CGIPath or CB (%p)\r\n", (void *)CGIPath);
         return 0;
@@ -47,6 +47,7 @@ http_CGI_pathFunctionHandle_t http_CGI_register_pathFunction(const char *CGIPath
                 CGI_path[i].CGI_path[strlen(CGIPath)] = 0;
 
                 CGI_path[i].CGI_pathFunction = CGIPathFunctionCb;
+                CGI_path[i].contentType = contentType;
                 return &CGI_path[i];
             }
         }
@@ -80,6 +81,15 @@ void http_CGI_deRegister_all(void)
             CGI_path[i].CGI_pathFunction = NULL;
         }
     }
+}
+
+http_response_contenttype_t http_cgi_get_contentType(http_CGI_pathFunctionHandle_t pathFunctionHandle)
+{
+    if (NULL != pathFunctionHandle)
+    {
+        return pathFunctionHandle->contentType;
+    }
+    return -1;
 }
 
 //temporarily commented off to fix pedantic errors. Not major since this is this is a test function. ISSUE #2

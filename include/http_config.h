@@ -19,7 +19,7 @@
 
 //server buffer size
 #define HTTP_SERVER_READ_BUFFER_SIZE (unsigned int)1024
-#define HTTP_SERVER_WRITE_BUFFER_SIZE (unsigned int)1024
+#define HTTP_SERVER_HEADER_BUFFER_SIZE (unsigned int)256 //this can be lesser
 #define HTTP_SERVER_FREAD_BUFFER_SIZE (unsigned int)1024
 
 //server read timeout
