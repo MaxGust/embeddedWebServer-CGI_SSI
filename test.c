@@ -788,16 +788,16 @@ int test_file_local_filesystem(void)
 
   //ty rto read more contents than remaining
   readLength = http_localfs_fread((void *)&fileReadBuffer, 100, 1, fp);
-  if ((unsigned int)readLength != index1_html_len - 55)
+  if ((unsigned int)readLength != index1_html_len - 54)
   {
     printf(FAIL "test_file_local_filesystem(remaining read content length)\r\n");
     return -1;
   }
   printf(PASS "test_file_local_filesystem(read - remaining content length)\r\n");
   //test remaining read contents
-  if (0 != strncmp((const char *)&index1_html[54], (const char *)fileReadBuffer, readLength))
+  if (0 != strncmp((const char *)&index1_html[54], (const char *)fileReadBuffer, readLength-1))
   {
-    printf(FAIL "test_file_local_filesystem(remaining read content comparison)\r\n");
+    printf(FAIL "test_file_local_filesystem(remaining read content comparison(%d))\r\n",readLength);
     return -1;
   }
   printf(PASS "test_file_local_filesystem(read - remaining content comparison)\r\n");
