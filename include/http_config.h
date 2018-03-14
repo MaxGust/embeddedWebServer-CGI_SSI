@@ -17,10 +17,11 @@
 //populate a default index for local FS
 #define HTTP_LOCALFS_INDEX
 
-//server buffer size
-#define HTTP_SERVER_READ_BUFFER_SIZE (unsigned int)1024
-#define HTTP_SERVER_HEADER_BUFFER_SIZE (unsigned int)256 //this can be lesser
-#define HTTP_SERVER_FREAD_BUFFER_SIZE (unsigned int)1024
+//server buffer sizes. All these are created locally per request. 
+#define HTTP_SERVER_READ_BUFFER_SIZE (unsigned int)1024 //buffer used to read incoming request from network
+#define HTTP_SERVER_HEADER_BUFFER_SIZE (unsigned int)256 //buffer used to form and later send response through socket. this can be lesser
+#define HTTP_SERVER_FREAD_BUFFER_SIZE (unsigned int)1024 //buffer used to send contents. chunked vs regular send will be based on this vs filesize
+#define HTTP_SERVER_CGI_BUFFER_SIZE (unsigned int)256 //buffer used to hold response from CGI.
 
 //server read timeout
 #define HTTP_SERVER_TIMOUT_MS 100

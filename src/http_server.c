@@ -30,6 +30,22 @@ static int http_server_send404(HTTP_response_headerRequest_t *httpResponse, int 
     return 0;
 }
 
+static int http_server_send_serverError500(HTTP_response_headerRequest_t *httpResponse, int socket, http_net_netops_t *netops)
+{
+    httpResponse->responseCode = HTTP_RESCODE_serrorInternalerror;
+    int retBufLen = http_response_response_header(*httpResponse);
+
+    //check retval write and disconnect
+    if (retBufLen <= 0)
+    {
+        PRINT_ERROR("error forming 500 header (%d)\r\n", retBufLen);
+        return -1;
+    }
+    netops->http_net_write(socket, (unsigned char *)httpResponse->headerBuffer, retBufLen, HTTP_SERVER_TIMOUT_MS);
+    netops->http_net_disconnect(socket);
+    return 0;
+}
+
 int http_server(int socket, http_net_netops_t *netops)
 {
     unsigned char httpReadBuffer[HTTP_SERVER_READ_BUFFER_SIZE];
@@ -94,7 +110,7 @@ int http_server(int socket, http_net_netops_t *netops)
                     //check retval write and disconnect
                     if (retBufLen <= 0)
                     {
-                        PRINT_ERROR("error forming 404 header (%d)\r\n", httpFileClass_none);
+                        PRINT_ERROR("error forming 200 header (%d)\r\n", retBufLen);
                         return -1;
                     }
                     netops->http_net_write(socket, (unsigned char *)httpHeaderBuffer, retBufLen, HTTP_SERVER_TIMOUT_MS); //write header
@@ -123,8 +139,40 @@ int http_server(int socket, http_net_netops_t *netops)
                 }
                 return 0;
             }
-            else{//time to execute cgi
-                
+            else
+            { //time to execute cgi
+                unsigned char cgiBuffer[HTTP_SERVER_CGI_BUFFER_SIZE];
+                int retBufLength = http_CGI_exec_pathFunction(http_request.httpFilePath, (char *)&cgiBuffer, HTTP_SERVER_CGI_BUFFER_SIZE);
+                if (retBufLength <= 0)
+                { //send an internal error response
+                    PRINT_ERROR("error executing pathFunction (%s - %d)\r\n", http_request.httpFilePath, retBufLength);
+                    int retval = http_server_send_serverError500(&httpResponse, socket, netops);
+                    if (retval < 0)
+                    {
+                        PRINT_ERROR("error forming 500 header (%d)\r\n", retval);
+                        return -1;
+                    }
+                    return 0;
+                }
+                else
+                {
+                    httpResponse.responseCode = HTTP_RESCODE_successSuccess; //200 OK
+                    httpResponse.bodyLength = retBufLength;
+                    httpResponse.filePath = http_request.httpFilePath;
+                    http_response_contenttype_t contentType=http_cgi_get_contentType(http_CGI_get_pathFunctionHandle(http_request.httpFilePath));
+                    httpResponse.contentType=contentType;
+                    retBufLen = http_response_response_header(httpResponse);
+                    //check retval write and disconnect
+                    if (retBufLen <= 0)
+                    {
+                        PRINT_ERROR("error forming 200 header (%d)\r\n", retBufLen);
+                        return -1;
+                    }
+                    netops->http_net_write(socket, (unsigned char *)httpHeaderBuffer, retBufLen, HTTP_SERVER_TIMOUT_MS); //write header
+                    netops->http_net_write(socket, (unsigned char *)cgiBuffer, retBufLength, HTTP_SERVER_TIMOUT_MS);     //
+                    netops->http_net_disconnect(socket);
+                    return 0;
+                }
             }
         }
         break;

@@ -192,8 +192,8 @@ typedef struct
     char *headerBuffer;                                //buffer to populate the return header result
     unsigned int bufferLength;                         //length of the buffer being passed in.
     HTTP_response_transferEncoding_t transferEncoding; // transfer encoding to be used . currently supporting only chunked.
-    char *filePath;
-    http_response_contenttype_t contentType;
+    char *filePath;                                    //used to compute content type of not explicitly set using next parameter    
+    http_response_contenttype_t contentType;           //used to explicitly set the content type. will use path above if not set
 } HTTP_response_headerRequest_t;
 
 /*function to create a response header

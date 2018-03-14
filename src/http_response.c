@@ -334,7 +334,19 @@ int http_response_response_header(HTTP_response_headerRequest_t headerRequest)
     }
 
     //handle content type here
-    if (NULL != headerRequest.filePath)
+    if (0 != headerRequest.contentType)
+    {
+        char lcontentTypeLine[HTTP_RESPONSE_CONTTYPE_LENGTH];
+        int retVal;
+        retVal = http_response_contentTypeToString(headerRequest.contentType, lcontentTypeLine, HTTP_RESPONSE_CONTTYPE_LENGTH);
+        if (retVal < 0)
+        {
+            PRINT_ERROR("error converting contentType to string(%d)\r\n", (int)headerRequest.contentType);
+        }
+        snprintf(contentTypeLine, HTTP_RESPONSE_CONTTYPE_LENGTH, HTTP_RESHEADER_CONTENT_TYPE ": %s", lcontentTypeLine);
+        contentTypeLineDone = 1;
+    }
+    else if (NULL != headerRequest.filePath)
     {
         http_response_fileType_t fileType;
         char lcontentTypeLine[HTTP_RESPONSE_CONTTYPE_LENGTH];
@@ -345,18 +357,6 @@ int http_response_response_header(HTTP_response_headerRequest_t headerRequest)
         if (retval < 0)
         {
             PRINT_ERROR("error converting contentType to string(%d)\r\n", (int)fileType);
-        }
-        snprintf(contentTypeLine, HTTP_RESPONSE_CONTTYPE_LENGTH, HTTP_RESHEADER_CONTENT_TYPE ": %s", lcontentTypeLine);
-        contentTypeLineDone = 1;
-    }
-    else if (0 != headerRequest.contentType)
-    {
-        char lcontentTypeLine[HTTP_RESPONSE_CONTTYPE_LENGTH];
-        int retVal;
-        retVal = http_response_contentTypeToString(headerRequest.contentType, lcontentTypeLine, HTTP_RESPONSE_CONTTYPE_LENGTH);
-        if (retVal < 0)
-        {
-            PRINT_ERROR("error converting contentType to string(%d)\r\n", (int)headerRequest.contentType);
         }
         snprintf(contentTypeLine, HTTP_RESPONSE_CONTTYPE_LENGTH, HTTP_RESHEADER_CONTENT_TYPE ": %s", lcontentTypeLine);
         contentTypeLineDone = 1;

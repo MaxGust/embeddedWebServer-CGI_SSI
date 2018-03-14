@@ -322,7 +322,7 @@ int test_CGI_exec(void)
   }
 
   //try for a non-existant SSI string
-  if (http_CGI_exec_pathFunction("nonExistantVal", (char *)&stringArray, sizeof(stringArray))>=0)
+  if (http_CGI_exec_pathFunction("nonExistantVal", (char *)&stringArray, sizeof(stringArray)) >= 0)
   {
     printf(FAIL "test_CGI_exec(2)\r\n");
     return -1;
@@ -1009,6 +1009,8 @@ int http_server_dummy_read(int socket, unsigned char *readBuffer, int readBuffer
   unsigned char sock1RequestBuffer[] = "GET /ta.gs/ref_htt%20%20pmethods.html\r\ncache-control: no-cache\r\naccept-encoding: gzip, deflate\r\n\r\n";
   unsigned char sock2RequestBuffer[] = "GET /index1.html\r\ncache-control: no-cache\r\naccept-encoding: gzip, deflate\r\n\r\n";
   unsigned char sock3RequestBuffer[] = "GET /ta.gs/ref_htt%20%20pmethods.cgi\r\ncache-control: no-cache\r\naccept-encoding: gzip, deflate\r\n\r\n";
+  unsigned char sock4RequestBuffer[] = "GET /cgi/test.cgi\r\ncache-control: no-cache\r\naccept-encoding: gzip, deflate\r\n\r\n";
+
   if ((0 > socket) || (NULL == readBuffer) || (0 == readBufferLength) || (0 > timeoutMs))
   {
     return -1;
@@ -1027,6 +1029,11 @@ int http_server_dummy_read(int socket, unsigned char *readBuffer, int readBuffer
     memcpy((void *)readBuffer, (void *)&sock3RequestBuffer, sizeof(sock3RequestBuffer));
     return (int)sizeof(sock3RequestBuffer);
     break;
+  case 4:
+    memcpy((void *)readBuffer, (void *)&sock4RequestBuffer, sizeof(sock3RequestBuffer));
+    return (int)sizeof(sock3RequestBuffer);
+    break;
+
   default:
     return -1;
     break;
@@ -1038,6 +1045,7 @@ int http_server_dummy_write(int socket, unsigned char *writeBuffer, int writeBuf
 {
   char *sock1RetString = "HTTP/1.1 404 Not Found\r\n\r\n";
   char *sock2RetHeader = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 59\r\n\r\n";
+  char *sock4RetHeader = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 4\r\n\r\n" ;
   static int headerBody = 0;
   size_t compLen;
   if ((0 > socket) || (NULL == writeBuffer) || (0 == writeBufferLength) || (0 > timeoutMs))
@@ -1050,10 +1058,10 @@ int http_server_dummy_write(int socket, unsigned char *writeBuffer, int writeBuf
     compLen = sizeof(sock1RetString);
     if (0 != strncmp((char *)writeBuffer, sock1RetString, compLen))
     {
-      printf(FAIL "test_http_server (404 filenot found)\r\n");
+      printf(FAIL "test_http_server (HTML 404 filenot found)\r\n");
       return -1;
     }
-    printf(PASS "test_http_server (404 filenot found)\r\n");
+    printf(PASS "test_http_server (HTML 404 filenot found)\r\n");
     break;
   case 2:
     if (0 == headerBody)
@@ -1061,21 +1069,22 @@ int http_server_dummy_write(int socket, unsigned char *writeBuffer, int writeBuf
       compLen = sizeof(sock2RetHeader);
       if (0 != strncmp(sock2RetHeader, (char *)writeBuffer, compLen))
       {
-        printf(FAIL "test_http_server (200 OK header test)\r\n");
+        printf(FAIL "test_http_server (HTML 200 OK header test)\r\n");
         return -1;
       }
-      printf(PASS "test_http_server (200 OK header test)\r\n");
+      printf(PASS "test_http_server (HTML 200 OK header test)\r\n");
       headerBody += 1; //next expect body
       return 0;
     }
     else if (1 == headerBody)
     {
+      headerBody = 0; //set for next test
       if (0 != strncmp((char *)writeBuffer, (char *)index1_html, index1_html_len))
       {
-        printf(FAIL "test_http_server (200 OK body test)\r\n");
+        printf(FAIL "test_http_server (HTML 200 OK body test)\r\n");
         return -1;
       }
-      printf(PASS "test_http_server (200 OK body test(%d,%d))\r\n", index1_html_len, writeBufferLength);
+      printf(PASS "test_http_server (HTML 200 OK body test(%d,%d))\r\n", index1_html_len, writeBufferLength);
       return 0;
     }
     break;
@@ -1088,12 +1097,37 @@ int http_server_dummy_write(int socket, unsigned char *writeBuffer, int writeBuf
     }
     printf(PASS "test_http_server (404 filenot found-cgi)\r\n");
     break;
+  case 4:
+    if (0 == headerBody)
+    {
+      headerBody = 1; //next expect body
+      compLen = sizeof(sock4RetHeader);
+      if (0 != strncmp(sock4RetHeader, (char *)writeBuffer, compLen))
+      {
+        printf(FAIL "test_http_server (CGI HTML 200 OK header test)\r\n");
+        return -1;
+      }
+      printf(PASS "test_http_server (CGI HTML 200 OK header test)\r\n");
+      return 0;
+    }
+    else if (1 == headerBody)
+    {
+      headerBody = 0; //set for next test
+      if (0 != strncmp((char *)writeBuffer, "0xA0", 4))
+      {
+        printf(FAIL "test_http_server (CGI - HTML 200 OK body test)\r\n");
+        return -1;
+      }
+      printf(PASS "test_http_server (CGI - HTML 200 OK body test(%d,%d))\r\n", index1_html_len, writeBufferLength);
+      return 0;
+    }
+    break;
   default:
     return -1;
     break;
   }
-  //  printf("socket write stub (sock: %d, len: %d)\r\n",socket,writeBufferLength);
-  //  printf("%.*s",writeBufferLength,writeBuffer);
+  //printf("socket write stub (sock: %d, len: %d)\r\n", socket, writeBufferLength);
+  //printf("%.*s", writeBufferLength, writeBuffer);
 
   return -1;
 }
@@ -1105,6 +1139,17 @@ void http_server_dummy_disconnect(int socket)
   }
 }
 
+char *serverTest_cgiPathFunction_ret = "0xA0";
+int httpServerTest_cgiPathFunction(const char *CGIPath, char *replacerBuffer, unsigned int bufferLength);
+int httpServerTest_cgiPathFunction(const char *CGIPath, char *replacerBuffer, unsigned int bufferLength)
+{
+  if (0 != strcmp(CGIPath, "/cgi/test.cgi"))
+    return -1;
+  if ((bufferLength <= 0) || NULL == replacerBuffer)
+    return -1;
+  strncpy(replacerBuffer, serverTest_cgiPathFunction_ret, strlen(serverTest_cgiPathFunction_ret));
+  return strlen(serverTest_cgiPathFunction_ret);
+}
 //http_server_test
 int test_http_server(void)
 {
@@ -1112,6 +1157,7 @@ int test_http_server(void)
   http_file_fops_t localFSFops;
   http_localfs_deinit(); //just in case previous test left it in stale state
   http_localfs_init();
+  char *serverTestCGIPath = "/cgi/test.cgi";
   //register default index file into the local file system.
   int retval = http_localfs_registerFile(path_index1_html, (char *)&index1_html, index1_html_len, 0);
   if (retval < 0)
@@ -1153,6 +1199,22 @@ int test_http_server(void)
   if (0 > http_server(3, httpNetops))
   {
     printf(FAIL "test_http_server(sock 3)\r\n");
+    return -1;
+  }
+
+  //register a CGI path function
+  http_CGI_pathFunction_t *cgiPathHandle2;
+  cgiPathHandle2 = http_CGI_register_pathFunction(serverTestCGIPath, httpServerTest_cgiPathFunction, HTTP_contentType_plaintext);
+  if (NULL == cgiPathHandle2)
+  {
+    printf(FAIL "test_http_server(http_CGI_register_pathFunction)");
+    return -1;
+  }
+
+  //now call the server for CGI test socket
+  if (0 > http_server(4, httpNetops))
+  {
+    printf(FAIL "test_http_server(sock 4)\r\n");
     return -1;
   }
   printf(PASS ">>test_http_server<<\r\n");
