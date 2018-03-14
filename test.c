@@ -629,12 +629,14 @@ int test_response_header(void)
 
   HTTP_response_headerRequest_t headerRequest;
   char headerBuffer[300];
+  http_response_initReponseStruct(&headerRequest);
   headerRequest.responseCode = HTTP_RESCODE_successSuccess;
   headerRequest.bodyLength = 1024;
   headerRequest.headerBuffer = (char *)&headerBuffer;
   headerRequest.bufferLength = 300;
   headerRequest.transferEncoding = transferEnc_none;
   headerRequest.filePath = "/index.html";
+  
 
   int retBufLen = 0;
 
