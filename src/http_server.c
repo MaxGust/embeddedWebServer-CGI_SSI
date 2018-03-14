@@ -6,12 +6,29 @@
 #include "http_SSI_replacer.h"
 #include "http_response.h"
 #include "http_server.h"
+#include "http_cgi.h"
 
 /*this connection is a per-connection server
     precondition: 
         - netops and fops should have been registered
         - file system should be mounted and files should be registered
 */
+
+static int http_server_send404(HTTP_response_headerRequest_t *httpResponse, int socket, http_net_netops_t *netops)
+{
+    httpResponse->responseCode = HTTP_RESCODE_cerrorNotfound;
+    int retBufLen = http_response_response_header(*httpResponse);
+
+    //check retval write and disconnect
+    if (retBufLen <= 0)
+    {
+        PRINT_ERROR("error forming 404 header (%d)\r\n", retBufLen);
+        return -1;
+    }
+    netops->http_net_write(socket, (unsigned char *)httpResponse->headerBuffer, retBufLen, HTTP_SERVER_TIMOUT_MS);
+    netops->http_net_disconnect(socket);
+    return 0;
+}
 
 int http_server(int socket, http_net_netops_t *netops)
 {
@@ -56,17 +73,12 @@ int http_server(int socket, http_net_netops_t *netops)
             }
             if (NULL == fp)
             { //file not found due to missing file or missing FS
-                httpResponse.responseCode = HTTP_RESCODE_cerrorNotfound;
-                retBufLen = http_response_response_header(httpResponse);
-
-                //check retval write and disconnect
-                if (retBufLen <= 0)
+                int retval = http_server_send404(&httpResponse, socket, netops);
+                if (retval < 0)
                 {
-                    PRINT_ERROR("error forming 404 header (%d)\r\n", httpFileType_none);
+                    PRINT_ERROR("error forming 404 header (%d)\r\n", retval);
                     return -1;
                 }
-                netops->http_net_write(socket, (unsigned char *)httpHeaderBuffer, retBufLen, HTTP_SERVER_TIMOUT_MS);
-                netops->http_net_disconnect(socket);
                 return 0;
             }
             else
@@ -86,19 +98,33 @@ int http_server(int socket, http_net_netops_t *netops)
                         return -1;
                     }
                     netops->http_net_write(socket, (unsigned char *)httpHeaderBuffer, retBufLen, HTTP_SERVER_TIMOUT_MS); //write header
-                    netops->http_net_write(socket, (unsigned char *)freadBuffer, readLen, HTTP_SERVER_TIMOUT_MS);  //
+                    netops->http_net_write(socket, (unsigned char *)freadBuffer, readLen, HTTP_SERVER_TIMOUT_MS);        //
                     netops->http_net_disconnect(socket);
                     return 0;
                 }
-                else{//time to do chunked encoding
-
+                else
+                { //time to do chunked encoding
                 }
             }
             break;
         case httpFileType_SSI:
             break;
         case httpFileType_CGI:
-            break;
+        {
+            http_CGI_pathFunctionHandle_t cgiPathFunctionHandle = 0;
+            cgiPathFunctionHandle = http_CGI_get_pathFunctionHandle(http_request.httpFilePath);
+            if (NULL == cgiPathFunctionHandle)
+            { //404 case
+                int retval = http_server_send404(&httpResponse, socket, netops);
+                if (retval < 0)
+                {
+                    PRINT_ERROR("error forming 404 header (%d)\r\n", retval);
+                    return -1;
+                }
+                return 0;
+            }
+        }
+        break;
         default:
             //return server error
             break;

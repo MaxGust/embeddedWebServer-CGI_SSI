@@ -1008,6 +1008,7 @@ int http_server_dummy_read(int socket, unsigned char *readBuffer, int readBuffer
 {
   unsigned char sock1RequestBuffer[] = "GET /ta.gs/ref_htt%20%20pmethods.html\r\ncache-control: no-cache\r\naccept-encoding: gzip, deflate\r\n\r\n";
   unsigned char sock2RequestBuffer[] = "GET /index1.html\r\ncache-control: no-cache\r\naccept-encoding: gzip, deflate\r\n\r\n";
+  unsigned char sock3RequestBuffer[] = "GET /ta.gs/ref_htt%20%20pmethods.cgi\r\ncache-control: no-cache\r\naccept-encoding: gzip, deflate\r\n\r\n";
   if ((0 > socket) || (NULL == readBuffer) || (0 == readBufferLength) || (0 > timeoutMs))
   {
     return -1;
@@ -1019,8 +1020,12 @@ int http_server_dummy_read(int socket, unsigned char *readBuffer, int readBuffer
     return (int)sizeof(sock1RequestBuffer);
     break;
   case 2: //index.html
-    memcpy((void *)readBuffer, (void *)&sock2RequestBuffer, sizeof(sock1RequestBuffer));
-    return (int)sizeof(sock1RequestBuffer);
+    memcpy((void *)readBuffer, (void *)&sock2RequestBuffer, sizeof(sock2RequestBuffer));
+    return (int)sizeof(sock2RequestBuffer);
+    break;
+  case 3:
+    memcpy((void *)readBuffer, (void *)&sock3RequestBuffer, sizeof(sock3RequestBuffer));
+    return (int)sizeof(sock3RequestBuffer);
     break;
   default:
     return -1;
@@ -1074,6 +1079,15 @@ int http_server_dummy_write(int socket, unsigned char *writeBuffer, int writeBuf
       return 0;
     }
     break;
+  case 3:
+    compLen = sizeof(sock1RetString);
+    if (0 != strncmp((char *)writeBuffer, sock1RetString, compLen))
+    {
+      printf(FAIL "test_http_server (404 filenot found - cgi)\r\n");
+      return -1;
+    }
+    printf(PASS "test_http_server (404 filenot found-cgi)\r\n");
+    break;
   default:
     return -1;
     break;
@@ -1126,10 +1140,19 @@ int test_http_server(void)
   //socket1 test - non-existant file
   if (0 > http_server(1, httpNetops))
   {
+    printf(FAIL "test_http_server(sock 1)\r\n");
     return -1;
   }
+  //socket2 test - index1.html from test page
   if (0 > http_server(2, httpNetops))
   {
+    printf(FAIL "test_http_server(sock 2)\r\n");
+    return -1;
+  }
+  //socket3 test - non existant CGI page
+  if (0 > http_server(3, httpNetops))
+  {
+    printf(FAIL "test_http_server(sock 3)\r\n");
     return -1;
   }
   printf(PASS ">>test_http_server<<\r\n");

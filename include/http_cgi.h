@@ -50,4 +50,6 @@ void http_CGI_printPathFunctionTable(void);
 /*get return content type of a specified path function using its handle*/
 http_response_contenttype_t http_cgi_get_contentType(http_CGI_pathFunctionHandle_t pathFunctionHandle);
 
+//function to get pathFunction handle of a path
+http_CGI_pathFunctionHandle_t http_CGI_get_pathFunctionHandle(char *CGIPath);
 #endif

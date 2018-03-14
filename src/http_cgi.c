@@ -14,7 +14,7 @@ int http_CGI_exec_pathFunction(char *CGIPath, char *replacerBuffer, unsigned int
 {
     int i;
     for (i = 0; i < HTTP_MAX_CGI_SIZE; i++)
-    { //find an empty slot and fill in the registration
+    {
         if (NULL != CGI_path[i].CGI_path)
         {
             if (0 == strcmp(CGIPath, CGI_path[i].CGI_path))
@@ -83,6 +83,7 @@ void http_CGI_deRegister_all(void)
     }
 }
 
+//function to get contentType form a pathFunction handle
 http_response_contenttype_t http_cgi_get_contentType(http_CGI_pathFunctionHandle_t pathFunctionHandle)
 {
     if (NULL != pathFunctionHandle)
@@ -90,6 +91,23 @@ http_response_contenttype_t http_cgi_get_contentType(http_CGI_pathFunctionHandle
         return pathFunctionHandle->contentType;
     }
     return -1;
+}
+
+//function to get pathFunction handle of a path
+http_CGI_pathFunctionHandle_t http_CGI_get_pathFunctionHandle(char *CGIPath)
+{
+    int i;
+    for (i = 0; i < HTTP_MAX_CGI_SIZE; i++)
+    {
+        if (NULL != CGI_path[i].CGI_path)
+        {
+            if (0 == strcmp(CGIPath, CGI_path[i].CGI_path))
+            {
+                return &CGI_path[i];
+            }
+        }
+    }
+    return NULL;
 }
 
 //temporarily commented off to fix pedantic errors. Not major since this is this is a test function. ISSUE #2
