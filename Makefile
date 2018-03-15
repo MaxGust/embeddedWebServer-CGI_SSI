@@ -6,3 +6,4 @@ test:
 	./test.out
 clean:
 	@rm -f *.out *.o
+.PHONY: all test clean
