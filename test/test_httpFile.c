@@ -41,6 +41,7 @@ int test_http_file(void)
   if (retval < 0)
   {
     printf(FAIL "test_http_file(registerFile failed)\r\n");
+    return -1;
   }
   printf(PASS "test_http_file(rgister File)\r\n");
 

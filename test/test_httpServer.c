@@ -365,16 +365,19 @@ int test_http_server(void)
   if (retval < 0)
   {
     printf(FAIL "test_http_server(registerFile failed)\r\n");
+    return -1;
   }
   retval = http_localfs_registerFile(path_index_long_html, (char *)&index_long_html, index_long_html_len, 0);
   if (retval < 0)
   {
     printf(FAIL "test_http_server(register long File failed)\r\n");
+    return -1;
   }
   retval = http_localfs_registerFile(path_SSI_ssi, (char *)&SSI_ssi, SSI_ssi_len, 0);
   if (retval < 0)
   {
-    printf(FAIL "test_http_server(register SSI File failed)\r\n");
+    printf(FAIL "test_http_server(http_localfs_registerFile)\r\n");
+    return -1;
   }
   //register fops. reusing fops wrapers from fs test
   http_file_init_fopsStruct(&localFSFops);

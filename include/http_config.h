@@ -11,6 +11,10 @@
 
 //Max number of SSI strings supported
 #define HTTP_MAX_SSI_SIZE 5
+//max length of an SSI string in html
+#define HTTP_MAX_SSI_LENGTH 15
+//maximum occurance of an SSI string per read buffer
+#define HTTP_MAX_PER_SSI_COUNT 10
 //Max number of CGIs supported
 #define HTTP_MAX_CGI_SIZE 5
 

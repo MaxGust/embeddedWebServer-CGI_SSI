@@ -122,9 +122,9 @@ int http_server(int socket, http_net_netops_t *netops)
                 else
                 {                                                            //time to do chunked encoding
                     httpResponse.responseCode = HTTP_RESCODE_successSuccess; //200 OK
-                    httpResponse.bodyLength=0;
-                    httpResponse.transferEncoding = transferEnc_chunked;     //set chunked encoding since we dont know actual length yet
-                    httpResponse.filePath = http_request.httpFilePath;       //path to be used for contentType
+                    httpResponse.bodyLength = 0;
+                    httpResponse.transferEncoding = transferEnc_chunked; //set chunked encoding since we dont know actual length yet
+                    httpResponse.filePath = http_request.httpFilePath;   //path to be used for contentType
                     retBufLen = http_response_response_header(httpResponse);
                     //check retval write and disconnect
                     if (retBufLen <= 0)
@@ -142,7 +142,7 @@ int http_server(int socket, http_net_netops_t *netops)
                     netops->http_net_write(socket, (unsigned char *)chunkedHeader, strlen(chunkedHeader), HTTP_SERVER_TIMOUT_MS);
                     //write contents
                     netops->http_net_write(socket, (unsigned char *)freadBuffer, readLen, HTTP_SERVER_TIMOUT_MS);
-                    netops->http_net_write(socket, (unsigned char*)"\r\n", 2, HTTP_SERVER_TIMOUT_MS);
+                    netops->http_net_write(socket, (unsigned char *)"\r\n", 2, HTTP_SERVER_TIMOUT_MS);
                     do
                     { //now read and write remaining contents
                         readLen = http_file_fops.fread(&freadBuffer, sizeof(freadBuffer), 1, fp);
@@ -151,19 +151,65 @@ int http_server(int socket, http_net_netops_t *netops)
                         netops->http_net_write(socket, (unsigned char *)chunkedHeader, strlen(chunkedHeader), HTTP_SERVER_TIMOUT_MS);
                         //write contents
                         netops->http_net_write(socket, (unsigned char *)freadBuffer, readLen, HTTP_SERVER_TIMOUT_MS);
-                        netops->http_net_write(socket, (unsigned char*)"\r\n", 2, HTTP_SERVER_TIMOUT_MS);
+                        netops->http_net_write(socket, (unsigned char *)"\r\n", 2, HTTP_SERVER_TIMOUT_MS);
                     } while (!http_file_fops.feof(fp));
 
                     //send last 0\r\n\r\n
-                    netops->http_net_write(socket, (unsigned char*)"0\r\n\r\n", 5, HTTP_SERVER_TIMOUT_MS);
+                    netops->http_net_write(socket, (unsigned char *)"0\r\n\r\n", 5, HTTP_SERVER_TIMOUT_MS);
                     netops->http_net_disconnect(socket);
                 }
             }
             break;
         case httpFileClass_SSI:
-            break;
-        case httpFileClass_CGI:
         {
+            if (NULL != http_file_fops.fopen)
+            { //else FS is not mounted
+                fp = http_file_fops.fopen(http_request.httpFilePath);
+            }
+            else
+            {
+                PRINT_ERROR("fops not mounted(%d)\r\n", httpFileClass_none);
+                fp = NULL;
+            }
+            if (NULL == fp)
+            { //file not found due to missing file or missing FS
+                int retval = http_server_send404(&httpResponse, socket, netops);
+                if (retval < 0)
+                {
+                    PRINT_ERROR("error forming 404 header (%d)\r\n", retval);
+                    return -1;
+                }
+                return 0;
+            }
+            else
+            { //file found . do read, determine if chunking is required, write accordingly and disconnect
+                char freadBuffer[HTTP_SERVER_FREAD_BUFFER_SIZE];
+                int readLen = http_file_fops.fread(&freadBuffer, sizeof(freadBuffer), 1, fp);
+                if (http_file_fops.feof(fp))
+                {                                                            //complete contents has been read to buffer. no chunking required
+                    httpResponse.responseCode = HTTP_RESCODE_successSuccess; //200 OK
+                    httpResponse.bodyLength = readLen;
+                    httpResponse.filePath = http_request.httpFilePath;
+                    retBufLen = http_response_response_header(httpResponse);
+                    //check retval write and disconnect
+                    if (retBufLen <= 0)
+                    {
+                        PRINT_ERROR("error forming 200 header (%d)\r\n", retBufLen);
+                        return -1;
+                    }
+                    netops->http_net_write(socket, (unsigned char *)httpHeaderBuffer, retBufLen, HTTP_SERVER_TIMOUT_MS); //write header
+                    netops->http_net_write(socket, (unsigned char *)freadBuffer, readLen, HTTP_SERVER_TIMOUT_MS);        //
+                    netops->http_net_disconnect(socket);
+                    return 0;
+                }
+                else
+                {  //time to do chunking
+                }
+            }
+        }
+        break;
+        case httpFileClass_CGI:
+        { //no suport for chunked CGI output
             http_CGI_pathFunctionHandle_t cgiPathFunctionHandle = 0;
             cgiPathFunctionHandle = http_CGI_get_pathFunctionHandle(http_request.httpFilePath);
             if (NULL == cgiPathFunctionHandle)
@@ -180,7 +226,7 @@ int http_server(int socket, http_net_netops_t *netops)
             { //time to execute cgi
                 unsigned char cgiBuffer[HTTP_SERVER_CGI_BUFFER_SIZE];
                 int retBufLength = http_CGI_exec_pathFunction(http_request.httpFilePath, (char *)&cgiBuffer, HTTP_SERVER_CGI_BUFFER_SIZE);
-                if (retBufLength <= 0)
+                if (retBufLength < 0)
                 { //send an internal error response
                     PRINT_ERROR("error executing pathFunction (%s - %d)\r\n", http_request.httpFilePath, retBufLength);
                     int retval = http_server_send_serverError500(&httpResponse, socket, netops);
@@ -195,18 +241,21 @@ int http_server(int socket, http_net_netops_t *netops)
                 {
                     httpResponse.responseCode = HTTP_RESCODE_successSuccess; //200 OK
                     httpResponse.bodyLength = retBufLength;
-                    httpResponse.filePath = http_request.httpFilePath;
+                    httpResponse.filePath = NULL;
                     http_response_contenttype_t contentType = http_cgi_get_contentType(http_CGI_get_pathFunctionHandle(http_request.httpFilePath));
                     httpResponse.contentType = contentType;
                     retBufLen = http_response_response_header(httpResponse);
                     //check retval write and disconnect
-                    if (retBufLen <= 0)
+                    if (retBufLen < 0)
                     {
                         PRINT_ERROR("error forming 200 header (%d)\r\n", retBufLen);
                         return -1;
                     }
                     netops->http_net_write(socket, (unsigned char *)httpHeaderBuffer, retBufLen, HTTP_SERVER_TIMOUT_MS); //write header
-                    netops->http_net_write(socket, (unsigned char *)cgiBuffer, retBufLength, HTTP_SERVER_TIMOUT_MS);     //
+                    if (retBufLen != 0)
+                    { //case where operation was successful but no content to pass on.
+                        netops->http_net_write(socket, (unsigned char *)cgiBuffer, retBufLength, HTTP_SERVER_TIMOUT_MS);
+                    }
                     netops->http_net_disconnect(socket);
                     return 0;
                 }

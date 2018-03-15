@@ -20,6 +20,7 @@ int test_file_local_filesystem(void)
   if (retval < 0)
   {
     printf(FAIL "test_file_local_filesystem(registerFile failed)\r\n");
+    return -1;
   }
   printf(PASS "test_file_local_filesystem(rgister File)\r\n");
   //test fopen
