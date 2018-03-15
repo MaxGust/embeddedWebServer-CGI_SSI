@@ -4,7 +4,7 @@
 #include "http_common.h"
 #include "http_config.h"
 
-#define HTTP_LOCAL_FILESYSTEM_NUMFILES 3
+#define HTTP_LOCAL_FILESYSTEM_NUMFILES 5
 
 typedef struct
 {

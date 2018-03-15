@@ -31,7 +31,7 @@ int http_CGI_exec_pathFunction(char *CGIPath, char *replacerBuffer, unsigned int
 http_CGI_pathFunctionHandle_t http_CGI_register_pathFunction(const char *CGIPath, http_CGI_pathFunction_cb CGIPathFunctionCb, http_response_contenttype_t contentType)
 {
     //find a uninitialized array element
-    if ((NULL == CGIPath) || (NULL == CGIPathFunctionCb) || (0 == contentType))
+    if ((NULL == CGIPath) || (NULL == CGIPathFunctionCb) )
     {
         PRINT_ERROR("ERROR: http_CGI_register_pathFunction - NULL CGIPath or CB (%p)\r\n", (void *)CGIPath);
         return 0;
@@ -92,7 +92,7 @@ http_response_contenttype_t http_cgi_get_contentType(http_CGI_pathFunctionHandle
     {
         return pathFunctionHandle->contentType;
     }
-    return -1;
+    return 0; //no content type registered
 }
 
 //function to get pathFunction handle of a path
