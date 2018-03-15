@@ -23,6 +23,9 @@ typedef struct
 } http_SSI_replacer_t;
 
 typedef http_SSI_replacer_t *http_SSI_replacerHandle_t;
+
+extern http_SSI_replacer_t http_SSI_replacer[];
+
 /*function used to register a SSI string replacer function. 
     IN : "static" string to be replaced and associated callback function
     OUT : 0  = Success

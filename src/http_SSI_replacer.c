@@ -8,12 +8,12 @@
 1) lookup speed is better than linked list
 2) configuration is static and fixed at compile time. This can be adjusted in http_config.h 
 */
-http_SSI_replacer_t http_SSI_replacer[HTTP_MAX_SSI_SIZE]; //hoping compiler to do its job and init to 0
+http_SSI_replacer_t http_SSI_replacer[HTTP_MAX_SSI_COUNT]; //hoping compiler to do its job and init to 0
 
 int http_SSI_get_replacer_string(char *SSIString, char *replacerBuffer, unsigned int bufferLength)
 {
     int i;
-    for (i = 0; i < HTTP_MAX_SSI_SIZE; i++)
+    for (i = 0; i < HTTP_MAX_SSI_COUNT; i++)
     { //find an empty slot and fill in the registration
         if (NULL != http_SSI_replacer[i].SSI_String)
         {
@@ -37,7 +37,7 @@ http_SSI_replacerHandle_t http_SSI_register_replacer(const char *SSIString, http
     else
     {
         int i = 0;
-        for (i = 0; i < HTTP_MAX_SSI_SIZE; i++)
+        for (i = 0; i < HTTP_MAX_SSI_COUNT; i++)
         { //find an empty slot and fill in the registration
             if (NULL == http_SSI_replacer[i].SSI_String)
             {
@@ -70,7 +70,7 @@ void http_SSI_deRegister_replacer(http_SSI_replacerHandle_t deregisterHandle)
 void http_SSI_deRegister_all(void)
 {
     int i = 0;
-    for (i = 0; i < HTTP_MAX_SSI_SIZE; i++)
+    for (i = 0; i < HTTP_MAX_SSI_COUNT; i++)
     { //find an empty slot and fill in the registration
         if (0 != http_SSI_replacer[i].SSI_String)
         {
@@ -89,7 +89,7 @@ void http_SSI_printReplacerTable(void)
 {
     int i;
     printf("REPLACER\t\tSTRING\r\n");
-    for (i = 0; i < HTTP_MAX_SSI_SIZE; i++)
+    for (i = 0; i < HTTP_MAX_SSI_COUNT; i++)
     {
         printf("%p\t\t", (void *)http_SSI_replacer[i].SSI_stringReplacer);
         printf("%s\r\n", http_SSI_replacer[i].SSI_String);

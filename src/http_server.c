@@ -47,6 +47,33 @@ static int http_server_send_serverError500(HTTP_response_headerRequest_t *httpRe
     return 0;
 }
 
+//helper function to find and replace a string . This function will overwrite contents of the original input buffer.
+//So, make sure there is enough space left to process the replacement.
+//returns number of replacements done.
+static int http_server_findNreplace(char *buffer, int bufferLen, char *find, char *replace)
+{
+    int count = 0;
+
+    //null terminate the buffer before proceeding. This should have been done at the source as well.
+    buffer[bufferLen] = 0;
+    unsigned int replaceLen=strlen(replace);
+    unsigned int findLen=strlen(find);
+
+    char *position=0;
+    do
+    {
+        //find occurrance of the string
+        position = strstr(buffer, find);
+        if (NULL == position)
+            return count;
+        sprintf(position,"%s%s",replace,position+findLen);
+        position += replaceLen; //to avoid recurssive replace
+        count++;
+    }while (strlen(position)>findLen); //do while there is still more content left in the buffer
+    
+    return count;
+}
+
 int http_server(int socket, http_net_netops_t *netops)
 {
     unsigned char httpReadBuffer[HTTP_SERVER_READ_BUFFER_SIZE];
@@ -184,11 +211,43 @@ int http_server(int socket, http_net_netops_t *netops)
             else
             { //file found . do read, determine if chunking is required, write accordingly and disconnect
                 char freadBuffer[HTTP_SERVER_FREAD_BUFFER_SIZE];
-                int readLen = http_file_fops.fread(&freadBuffer, sizeof(freadBuffer), 1, fp);
+
+                //****inefficient and probably error inducing mechanism to process SSI replacement follows
+                struct
+                {
+                    char SSIString[HTTP_MAX_SSI_LENGTH + 12]; //string and <!--##-->
+                    char SSIReplacementString[HTTP_MAX_SSI_REPLACE_LENGTH];
+                } ssiReplacements[HTTP_MAX_SSI_COUNT];
+
+                int ssiCount = 0;
+                //compute all replacement string irrespective of occurrence. optimize by computing only required strings
+                //this has to be computed ahead of time to avoid the replacement strings changing while we process this in server
+                int i = 0;
+                for (i = 0; i < HTTP_MAX_SSI_COUNT; i++)
+                { //iterate through the http_SSI_replacer to look for registered strings
+                    if (NULL != http_SSI_replacer[i].SSI_String)
+                    {
+                        snprintf(ssiReplacements[ssiCount].SSIString, (HTTP_MAX_SSI_LENGTH + 12), "<!--#%s#-->", http_SSI_replacer[i].SSI_String);
+                        http_SSI_get_replacer_string(http_SSI_replacer[i].SSI_String, ssiReplacements[ssiCount].SSIReplacementString, HTTP_MAX_SSI_REPLACE_LENGTH);
+                        ssiCount++;
+                    }
+                }
+
+                //populating only half the buffer to have space for replacements.
+                //leavinf last location for null terminating so that we can process it as a string
+                int readLen = http_file_fops.fread(&freadBuffer, (HTTP_SERVER_FREAD_BUFFER_SIZE / 2) - 1, 1, fp);
+                freadBuffer[readLen ] = 0;
                 if (http_file_fops.feof(fp))
-                {                                                            //complete contents has been read to buffer. no chunking required
+                { //complete contents has been read to buffer. no chunking required
+                    for (i = 0; i < ssiCount; i++)
+                    { //search and replace all occurrences of the SSI string with replacement contens
+                        //passing readlen+1 so that null termination can be proper. we are reading a byte less anyway
+                        http_server_findNreplace((char *)&freadBuffer, HTTP_SERVER_FREAD_BUFFER_SIZE, ssiReplacements[i].SSIString, ssiReplacements[i].SSIReplacementString);
+                    }
+                    
+                    //form the header, and write header followed by processed contents
                     httpResponse.responseCode = HTTP_RESCODE_successSuccess; //200 OK
-                    httpResponse.bodyLength = readLen;
+                    httpResponse.bodyLength = strlen(freadBuffer);
                     httpResponse.filePath = http_request.httpFilePath;
                     retBufLen = http_response_response_header(httpResponse);
                     //check retval write and disconnect
@@ -198,12 +257,13 @@ int http_server(int socket, http_net_netops_t *netops)
                         return -1;
                     }
                     netops->http_net_write(socket, (unsigned char *)httpHeaderBuffer, retBufLen, HTTP_SERVER_TIMOUT_MS); //write header
-                    netops->http_net_write(socket, (unsigned char *)freadBuffer, readLen, HTTP_SERVER_TIMOUT_MS);        //
+
+                    netops->http_net_write(socket, (unsigned char *)freadBuffer, httpResponse.bodyLength, HTTP_SERVER_TIMOUT_MS); //
                     netops->http_net_disconnect(socket);
                     return 0;
                 }
                 else
-                {  //time to do chunking
+                { //time to do chunking
                 }
             }
         }

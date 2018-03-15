@@ -10,9 +10,12 @@
 #define HTTP_MAX_METHOD_LENGTH 8
 
 //Max number of SSI strings supported
-#define HTTP_MAX_SSI_SIZE 5
+#define HTTP_MAX_SSI_COUNT 5
 //max length of an SSI string in html
 #define HTTP_MAX_SSI_LENGTH 15
+//max length of a SSI replacement string 
+#define HTTP_MAX_SSI_REPLACE_LENGTH 150
+
 //maximum occurance of an SSI string per read buffer
 #define HTTP_MAX_PER_SSI_COUNT 10
 //Max number of CGIs supported
