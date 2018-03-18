@@ -56,22 +56,80 @@ static int http_server_findNreplace(char *buffer, int bufferLen, char *find, cha
 
     //null terminate the buffer before proceeding. This should have been done at the source as well.
     buffer[bufferLen] = 0;
-    unsigned int replaceLen=strlen(replace);
-    unsigned int findLen=strlen(find);
+    unsigned int replaceLen = strlen(replace);
+    unsigned int findLen = strlen(find);
 
-    char *position=0;
+    char *position = 0;
     do
     {
         //find occurrance of the string
         position = strstr(buffer, find);
         if (NULL == position)
             return count;
-        sprintf(position,"%s%s",replace,position+findLen);
+        sprintf(position, "%s%s", replace, position + findLen);
         position += replaceLen; //to avoid recurssive replace
         count++;
-    }while (strlen(position)>findLen); //do while there is still more content left in the buffer
-    
+    } while (strlen(position) > findLen); //do while there is still more content left in the buffer
+
     return count;
+}
+
+static int http_server_writeChunkedBody(int socket, char *buffer, int length, http_net_netops_t *netops)
+{
+    char chunkedHeader[20];
+    sprintf(chunkedHeader, "%04X\r\n", length);
+    //write size
+    netops->http_net_write(socket, (unsigned char *)chunkedHeader, strlen(chunkedHeader), HTTP_SERVER_TIMOUT_MS);
+    //write contents
+    netops->http_net_write(socket, (unsigned char *)buffer, length, HTTP_SERVER_TIMOUT_MS);
+    netops->http_net_write(socket, (unsigned char *)"\r\n", 2, HTTP_SERVER_TIMOUT_MS);
+    return 0;
+}
+
+static int http_server_findNseekBack(char *buffer, void *fp)
+{
+    int bufferLen = strlen(buffer) - 1; //0 indexed buffer length
+    if (buffer[bufferLen] == '<')
+    {
+        http_file_fops.fseek(fp, -1, SEEK_END);
+        buffer[bufferLen] = '\0';
+    }
+    else if (strcmp(&(buffer[bufferLen - 1]), "<-"))
+    {
+        http_file_fops.fseek(fp, -2, SEEK_END);
+        buffer[bufferLen - 1] = '\0';
+    }
+    else if (strcmp(&(buffer[bufferLen - 2]), "<--"))
+    {
+        http_file_fops.fseek(fp, -3, SEEK_END);
+        buffer[bufferLen - 2] = '\0';
+    }
+    else if (strcmp(&(buffer[bufferLen - 3]), "<--#"))
+    {
+        http_file_fops.fseek(fp, -4, SEEK_END);
+        buffer[bufferLen - 3] = '\0';
+    }
+    else
+    {
+        char *position = 0, *pPosition = 0;
+        do
+        {
+            pPosition = position;
+            position = strstr(buffer, "<!--#");
+        } while (NULL != position);
+
+        if (NULL != pPosition)
+        {
+            unsigned int pPositionIndex=(buffer-pPosition);
+            if(NULL!=strstr(pPosition+5,"#-->")){
+                return 0;
+            }
+            else{
+                http_file_fops.fseek(fp, (0 - pPositionIndex), SEEK_END);
+            }
+        }
+    }
+    return 0;
 }
 
 int http_server(int socket, http_net_netops_t *netops)
@@ -129,7 +187,7 @@ int http_server(int socket, http_net_netops_t *netops)
             { //file found . do read, determine if chunking is required, write accordingly and disconnect
                 char freadBuffer[HTTP_SERVER_FREAD_BUFFER_SIZE];
                 int readLen = http_file_fops.fread(&freadBuffer, sizeof(freadBuffer), 1, fp);
-                if (http_file_fops.feof(fp))
+                if (http_file_fops.eof(fp))
                 {                                                            //complete contents has been read to buffer. no chunking required
                     httpResponse.responseCode = HTTP_RESCODE_successSuccess; //200 OK
                     httpResponse.bodyLength = readLen;
@@ -161,25 +219,13 @@ int http_server(int socket, http_net_netops_t *netops)
                     }
                     //send out the response header
                     netops->http_net_write(socket, (unsigned char *)httpHeaderBuffer, retBufLen, HTTP_SERVER_TIMOUT_MS); //write header
-                    char chunkedHeader[20];
 
-                    //first write the contents we have read already
-                    sprintf(chunkedHeader, "%04X\r\n", readLen);
-                    //write size
-                    netops->http_net_write(socket, (unsigned char *)chunkedHeader, strlen(chunkedHeader), HTTP_SERVER_TIMOUT_MS);
-                    //write contents
-                    netops->http_net_write(socket, (unsigned char *)freadBuffer, readLen, HTTP_SERVER_TIMOUT_MS);
-                    netops->http_net_write(socket, (unsigned char *)"\r\n", 2, HTTP_SERVER_TIMOUT_MS);
+                    http_server_writeChunkedBody(socket, (char *)freadBuffer, readLen, netops);
                     do
                     { //now read and write remaining contents
                         readLen = http_file_fops.fread(&freadBuffer, sizeof(freadBuffer), 1, fp);
-                        sprintf(chunkedHeader, "%04X\r\n", readLen);
-                        //write size
-                        netops->http_net_write(socket, (unsigned char *)chunkedHeader, strlen(chunkedHeader), HTTP_SERVER_TIMOUT_MS);
-                        //write contents
-                        netops->http_net_write(socket, (unsigned char *)freadBuffer, readLen, HTTP_SERVER_TIMOUT_MS);
-                        netops->http_net_write(socket, (unsigned char *)"\r\n", 2, HTTP_SERVER_TIMOUT_MS);
-                    } while (!http_file_fops.feof(fp));
+                        http_server_writeChunkedBody(socket, (char *)freadBuffer, readLen, netops);
+                    } while (!http_file_fops.eof(fp));
 
                     //send last 0\r\n\r\n
                     netops->http_net_write(socket, (unsigned char *)"0\r\n\r\n", 5, HTTP_SERVER_TIMOUT_MS);
@@ -229,22 +275,30 @@ int http_server(int socket, http_net_netops_t *netops)
                     {
                         snprintf(ssiReplacements[ssiCount].SSIString, (HTTP_MAX_SSI_LENGTH + 12), "<!--#%s#-->", http_SSI_replacer[i].SSI_String);
                         http_SSI_get_replacer_string(http_SSI_replacer[i].SSI_String, ssiReplacements[ssiCount].SSIReplacementString, HTTP_MAX_SSI_REPLACE_LENGTH);
+                        if (HTTP_MAX_SSI_LENGTH > strlen(ssiReplacements[ssiCount].SSIString))
+                        {
+                            //should we sned a server error here???
+                            PRINT_ERROR("registered SSI string is larger than HTTP_MAX_SSI_LENGTH. replacements might be messed up. increase HTTP_MAX_SSI_LENGTH in config (%d)\r\n", (int)strlen(ssiReplacements[ssiCount].SSIString));
+                        }
+                        if (HTTP_MAX_SSI_REPLACE_LENGTH < strlen(http_SSI_replacer[i].SSI_String))
+                        {
+                            PRINT_ERROR("replacement string for %s is larger than HTTP_MAX_SSI_REPLACE_LENGTH. modify config to avoid partial replacement\r\n", http_SSI_replacer[i].SSI_String);
+                        }
                         ssiCount++;
                     }
                 }
 
                 //populating only half the buffer to have space for replacements.
-                //leavinf last location for null terminating so that we can process it as a string
+                //leaving last location for null terminating so that we can process it as a string
                 int readLen = http_file_fops.fread(&freadBuffer, (HTTP_SERVER_FREAD_BUFFER_SIZE / 2) - 1, 1, fp);
-                freadBuffer[readLen ] = 0;
-                if (http_file_fops.feof(fp))
+                freadBuffer[readLen] = 0;
+                if (http_file_fops.eof(fp))
                 { //complete contents has been read to buffer. no chunking required
                     for (i = 0; i < ssiCount; i++)
                     { //search and replace all occurrences of the SSI string with replacement contens
-                        //passing readlen+1 so that null termination can be proper. we are reading a byte less anyway
                         http_server_findNreplace((char *)&freadBuffer, HTTP_SERVER_FREAD_BUFFER_SIZE, ssiReplacements[i].SSIString, ssiReplacements[i].SSIReplacementString);
                     }
-                    
+
                     //form the header, and write header followed by processed contents
                     httpResponse.responseCode = HTTP_RESCODE_successSuccess; //200 OK
                     httpResponse.bodyLength = strlen(freadBuffer);
@@ -257,13 +311,57 @@ int http_server(int socket, http_net_netops_t *netops)
                         return -1;
                     }
                     netops->http_net_write(socket, (unsigned char *)httpHeaderBuffer, retBufLen, HTTP_SERVER_TIMOUT_MS); //write header
-
+                    //now write the modified contents file into netstream
                     netops->http_net_write(socket, (unsigned char *)freadBuffer, httpResponse.bodyLength, HTTP_SERVER_TIMOUT_MS); //
                     netops->http_net_disconnect(socket);
                     return 0;
                 }
                 else
-                { //time to do chunking
+                {                                                            //time to do chunking
+                    httpResponse.responseCode = HTTP_RESCODE_successSuccess; //200 OK
+                    httpResponse.bodyLength = 0;
+                    httpResponse.transferEncoding = transferEnc_chunked; //set chunked encoding since we dont know actual length yet
+                    httpResponse.filePath = http_request.httpFilePath;   //path to be used for contentType
+                    retBufLen = http_response_response_header(httpResponse);
+                    //check retval write and disconnect
+                    if (retBufLen <= 0)
+                    {
+                        PRINT_ERROR("error forming 200 header (%d)\r\n", retBufLen);
+                        return -1;
+                    }
+                    //send out the response header
+                    netops->http_net_write(socket, (unsigned char *)httpHeaderBuffer, retBufLen, HTTP_SERVER_TIMOUT_MS); //write header
+
+                    //search for partial SSI strings and seek back to read in next round
+                    http_server_findNseekBack((char *)freadBuffer, fp);
+
+                    //now do the replacement in buffer
+                    for (i = 0; i < ssiCount; i++)
+                    { //search and replace all occurrences of the SSI string with replacement contens
+                        http_server_findNreplace((char *)&freadBuffer, HTTP_SERVER_FREAD_BUFFER_SIZE, ssiReplacements[i].SSIString, ssiReplacements[i].SSIReplacementString);
+                    }
+                    int repBufLength = strlen(freadBuffer);
+                    //first write the contents we have read already
+                    http_server_writeChunkedBody(socket, freadBuffer, repBufLength, netops);
+                    do
+                    { //now read and write remaining contents
+                        readLen = http_file_fops.fread(&freadBuffer, (HTTP_SERVER_FREAD_BUFFER_SIZE / 2) - 1, 1, fp);
+                        freadBuffer[readLen] = 0;
+
+                        //search for incomplete comment in teh end and do a seek
+                        //now do the replacement in buffer
+                        for (i = 0; i < ssiCount; i++)
+                        { //search and replace all occurrences of the SSI string with replacement contens
+                            http_server_findNreplace((char *)&freadBuffer, HTTP_SERVER_FREAD_BUFFER_SIZE, ssiReplacements[i].SSIString, ssiReplacements[i].SSIReplacementString);
+                        }
+                        repBufLength = strlen(freadBuffer);
+
+                        http_server_writeChunkedBody(socket, freadBuffer, repBufLength, netops);
+                    } while (!http_file_fops.eof(fp));					
+
+                    //send last 0\r\n\r\n
+                    netops->http_net_write(socket, (unsigned char *)"0\r\n\r\n", 5, HTTP_SERVER_TIMOUT_MS);
+                    netops->http_net_disconnect(socket);
                 }
             }
         }

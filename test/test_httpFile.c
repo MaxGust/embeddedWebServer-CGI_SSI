@@ -52,7 +52,7 @@ int test_http_file(void)
   localFSFops.fread = http_localfs_fread_w;
   localFSFops.fgetc = http_localfs_fgetc_w;
   localFSFops.fseek = http_localfs_fseek_w;
-  localFSFops.feof = http_localfs_feof_w;
+  localFSFops.eof = http_localfs_feof_w;
 
   http_file_register_fops(localFSFops);
   printf(PASS "test_http_file(register fops)\r\n");

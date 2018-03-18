@@ -25,7 +25,7 @@ typedef struct
     http_file_fread_t fread;
     http_file_fgetc_t fgetc;
     http_file_fseek_t fseek;
-    http_file_feof_t feof;
+    http_file_feof_t eof;
 } http_file_fops_t; //type to register underlying file system fops to the HTTP server.
 
 //global variable used to access fops by http server

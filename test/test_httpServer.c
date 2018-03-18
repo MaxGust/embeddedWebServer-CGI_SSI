@@ -470,7 +470,7 @@ int test_http_server(void)
   localFSFops.fread = http_localfs_fread_w;
   localFSFops.fgetc = http_localfs_fgetc_w;
   localFSFops.fseek = http_localfs_fseek_w;
-  localFSFops.feof = http_localfs_feof_w;
+  localFSFops.eof = http_localfs_feof_w;
   http_file_register_fops(localFSFops);
   //register stub netops
   http_net_netops_t http_net_test_netops;

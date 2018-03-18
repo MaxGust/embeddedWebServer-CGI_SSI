@@ -109,7 +109,7 @@ int http_localfs_fgetc(http_localfs_filesystem_fp_t fp)
         return HTTP_FAILURE;
     }
     //end of file
-    if ((fp->filePosition + 1) == http_local_filesystem[fp->fileNumber].fileLength)
+    if ((fp->filePosition + 1) == (unsigned int)http_local_filesystem[fp->fileNumber].fileLength)
     {
         return -1; //EOF
     }
@@ -125,7 +125,7 @@ int http_localfs_fgetc(http_localfs_filesystem_fp_t fp)
 int http_localfs_feof(http_localfs_filesystem_fp_t fp)
 {
     //end of file
-    if (fp->filePosition == (http_local_filesystem[fp->fileNumber].fileLength - 1))
+    if (fp->filePosition == (unsigned int)(http_local_filesystem[fp->fileNumber].fileLength - 1))
     {
         return -1; //EOF
     }
@@ -139,7 +139,7 @@ size_t http_localfs_fread(void *ptr, size_t size, size_t nmemb, http_localfs_fil
         return HTTP_FAILURE;
     }
     //end of file
-    if ((fp->filePosition + 1) == http_local_filesystem[fp->fileNumber].fileLength)
+    if ((fp->filePosition + 1) == (unsigned int)http_local_filesystem[fp->fileNumber].fileLength)
     {
         return -1; //EOF
     }
@@ -214,7 +214,7 @@ int http_localfs_fseek(http_localfs_filesystem_fp_t fp, long offset, int whence)
     }
     case SEEK_CUR:
     {
-        if (((fp->filePosition + offset) >= 0) && ((fp->filePosition + offset) < http_local_filesystem[fp->fileNumber].fileLength))
+        if (((fp->filePosition + offset) >= 0) && ((fp->filePosition + offset) < (unsigned int)http_local_filesystem[fp->fileNumber].fileLength))
         {
             fp->filePosition += offset;
             return 0;
