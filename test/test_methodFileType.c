@@ -17,7 +17,7 @@ int test_methodFileType(void)
     else
     {
       //printf("result\r\n\tfileType: %d\r\n\tmethod: %d\r\n\tpath:%s\r\n\r\n", request.fileType, request.method, request.httpFilePath);
-      printf(FAIL "test_methodFileType(SSI GET)\r\n");
+      printf(FAIL "test_methodFileType(SSI GET(2))\r\n");
       return -1;
     }
   }
