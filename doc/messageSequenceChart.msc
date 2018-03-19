@@ -1,0 +1,34 @@
+HTTP_SERVER=>HTTP_NET :read client request;
+HTTP_NET>>HTTP_SERVER : client reqest;
+HTTP_SERVER => HTTP_REQUEST_PARSER : parse client request;
+HTTP_PARSER >> HTTP_SERVER : parsed client request;
+
+HTTP_SERVER alt HTTP_CGI: request class-CGI{
+HTTP_SERVER => HTTP_CGI : perform op and get response strings;
+HTTP_CGI >> HTTP_SERVER : response strings;
+HTTP_RESPONSE >> HTTP_SERVER : response header;
+HTTP_SERVER => HTTP_NET : write response to network;
+HTTP_SERVER => HTTP_NET : close connection;
+};
+
+HTTP_SERVER alt HTTP_FILE: request class -none{
+HTTP_SERVER=>HTTP_FILE : read file contents;
+HTTP_FILE >> HTTP_SERVER : file contents;
+HTTP_SERVER => HTTP_RESPONSE : form response header;
+HTTP_RESPONSE >> HTTP_SERVER : response header;
+HTTP_SERVER => HTTP_NET : write response to network;
+HTTP_SERVER => HTTP_NET : close connection;
+};
+
+HTTP_SERVER alt HTTP_SSI: request class -SSI{
+HTTP_SERVER=>HTTP_FILE : read file contents;
+HTTP_FILE >> HTTP_SERVER : file contents;
+HTTP_SERVER => HTTP_SSI : get replacement strings;
+HTTP_SSI >> HTTP_SERVER : replacement strings;
+HTTP_SERVER => HTTP_SERVER : perform replacements;
+HTTP_SERVER => HTTP_RESPONSE : form response header;
+HTTP_RESPONSE >> HTTP_SERVER : response header;
+HTTP_SERVER => HTTP_NET : write response to network;
+HTTP_SERVER => HTTP_NET : close connection;
+};
+
