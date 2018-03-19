@@ -102,8 +102,8 @@ int parseRquest_identifyRequest(unsigned char *requestBuffer, http_request_t *ht
     strncpy(path, startOfPath, endOfPath - startOfPath);
 
     //null termination
-    method[sizeof(method)] = 0; //-1 to remove trailing space
-    path[sizeof(path) - 1] = 0; //-1 to remove trailing space
+    method[sizeof(method)-1] = 0; //-1 to delete trailing space
+    path[sizeof(path)] = 0; 
 
     //parse and copy method for returning.
     httpRequest->method = parseRequest_mapMethodToEnum(method);

@@ -141,13 +141,14 @@ int http_server(int socket, http_net_netops_t *netops)
         PRINT_ERROR("netops read not initialized(%s)\r\n", "nullNetops");
         return -1;
     }
-    int byteCount = netops->http_net_read(socket, (unsigned char *)&httpReadBuffer, HTTP_SERVER_READ_BUFFER_SIZE, HTTP_SERVER_TIMOUT_MS);
+	//read one byte less to null terminate and make a string out of it.
+    int byteCount = netops->http_net_read(socket, (unsigned char *)&httpReadBuffer, HTTP_SERVER_READ_BUFFER_SIZE-1, HTTP_SERVER_TIMOUT_MS);
     if (byteCount <= 0)
     {
         PRINT_ERROR("netops read timedout(%d)\r\n", byteCount);
         return -1; //most probably a timeout error to read from client
     }
-
+	httpReadBuffer[byteCount]=0;
     //now the request headers are in buffer. time to parse the request
     http_request_t http_request;
     parseRquest_identifyRequest(httpReadBuffer, &http_request);
