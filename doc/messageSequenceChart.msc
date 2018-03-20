@@ -18,15 +18,17 @@ HTTP_SERVER => HTTP_NET [label="close connection"];
 
 
 HTTP_SERVER alt HTTP_FILE [label="request class-none",linecolor="blue"]{
+HTTP_SERVER loop HTTP_FILE [label="until eof",linecolor="indigo"]{
 HTTP_SERVER=>HTTP_FILE [label="read file contents"];
 HTTP_FILE >> HTTP_SERVER [label="file contents"];
 HTTP_SERVER => HTTP_RESPONSE [label="form response header"];
 HTTP_RESPONSE >> HTTP_SERVER [label="response header"];
-HTTP_SERVER => HTTP_NET [label="write response to network"];
+HTTP_SERVER => HTTP_NET [label="write response to network"];};
 HTTP_SERVER => HTTP_NET [label="close connection"];
 };
 
 HTTP_SERVER alt HTTP_SSI [label="request class-SSI",linecolor="orange"]{
+HTTP_SERVER loop HTTP_FILE [label="until eof",linecolor="violet"]{
 HTTP_SERVER=>HTTP_FILE [label="read file contents"];
 HTTP_FILE >> HTTP_SERVER [label="file contents"];
 HTTP_SERVER => HTTP_SSI [label="get replacement strings"];
@@ -34,7 +36,7 @@ HTTP_SSI >> HTTP_SERVER [label="replacement strings"];
 HTTP_SERVER => HTTP_SERVER [label="perform replacements"];
 HTTP_SERVER => HTTP_RESPONSE [label="form response header"];
 HTTP_RESPONSE >> HTTP_SERVER [label="response header"];
-HTTP_SERVER => HTTP_NET [label="write response to network"];
+HTTP_SERVER => HTTP_NET [label="write response to network"];};
 HTTP_SERVER => HTTP_NET [label="close connection"];
 };
 
