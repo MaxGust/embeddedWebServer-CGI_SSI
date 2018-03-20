@@ -100,7 +100,7 @@ int parseRquest_identifyRequest(unsigned char *requestBuffer, http_request_t *ht
     //copying internally
     strncpy(method, methordToken, strlen(methordToken));
     strncpy(path, startOfPath, endOfPath - startOfPath);
-
+	
     //null termination
     method[sizeof(method)-1] = 0; //-1 to delete trailing space
     path[sizeof(path)-1] = 0; //TODO: investigate trailing space
@@ -111,7 +111,13 @@ int parseRquest_identifyRequest(unsigned char *requestBuffer, http_request_t *ht
     //decode URL and copy path for returning.
     char decodedURL[sizeof(path)];
     url_decode(path, decodedURL);
-    strncpy(httpRequest->httpFilePath, decodedURL, HTTP_MAX_PATH_LENGTH);
+    
+	if(0==strcmp(decodedURL,"/")){ //redirect / to configured ROOT page.
+		strncpy(httpRequest->httpFilePath, HTTP_SERVER_ROOT_PAGE, HTTP_MAX_PATH_LENGTH);
+	}
+	else{
+		strncpy(httpRequest->httpFilePath, decodedURL, HTTP_MAX_PATH_LENGTH);
+	}
 
     //decode file type and add copy it for returning
     httpRequest->fileClass = parseRequest_identifyFileClass(path);

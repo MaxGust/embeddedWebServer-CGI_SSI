@@ -31,6 +31,22 @@ static int http_server_send404(HTTP_response_headerRequest_t *httpResponse, int 
     return 0;
 }
 
+static int http_server_send501(HTTP_response_headerRequest_t *httpResponse, int socket, http_net_netops_t *netops)
+{
+	httpResponse->responseCode = HTTP_RESCODE_serrorNotimplemented;
+	int retBufLen = http_response_response_header(*httpResponse);
+
+	//check retval write and disconnect
+	if (retBufLen <= 0)
+	{
+		PRINT_ERROR("error forming 501 header (%d)\r\n", retBufLen);
+		return -1;
+	}
+	netops->http_net_write(socket, (unsigned char *)httpResponse->headerBuffer, retBufLen, HTTP_SERVER_TIMOUT_MS);
+	netops->http_net_disconnect(socket);
+	return 0;
+}
+
 static int http_server_send_serverError500(HTTP_response_headerRequest_t *httpResponse, int socket, http_net_netops_t *netops)
 {
     httpResponse->responseCode = HTTP_RESCODE_serrorInternalerror;
@@ -422,13 +438,26 @@ int http_server(int socket, http_net_netops_t *netops)
         }
         break;
         default:
-            //return server error
-            break;
+            {
+				int retval = http_server_send404(&httpResponse, socket, netops);
+            if (retval < 0)
+            {
+	            PRINT_ERROR("error forming 404 header (%d)\r\n", retval);
+	            return -1;
+			} 
+			break;
+			}
         }
         break;
     default: //currently supporting only GET. for all other requests, respond with not implemented.
-
+		{int retval = http_server_send501(&httpResponse, socket, netops);
+		if (retval < 0)
+		{
+			PRINT_ERROR("error forming 501 header (%d)\r\n", retval);
+			return -1;
+		}
         break;
+		}
     }
     return 0;
 }
